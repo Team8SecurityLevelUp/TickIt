@@ -12,7 +12,7 @@ CREATE TABLE "user_verification" (
   "user_id" int NOT NULL,
   "token" varchar(10) NOT NULL,
   "expiration_date" timestamp NOT NULL,
-  "is_used" BIT NOT NULL DEFAULT false
+  "is_used" boolean NOT NULL DEFAULT false
 );
 
 CREATE TABLE "team_roles" (
