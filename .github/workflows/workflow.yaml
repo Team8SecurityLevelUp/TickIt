@@ -132,10 +132,8 @@ jobs:
         run: |
           EC2_HOST=${{ needs.terraform.outputs.ec2host }}
           ssh -o StrictHostKeyChecking=no -i privatekey.pem "ubuntu@$EC2_HOST" '
-            mv start-serve.sh front-end-build/
-            && 
-            cd front-end-build/ 
-            &&
+            mv start-serve.sh front-end-build/ && 
+            cd front-end-build/ &&
             chmod +x start-serve.sh
           '
 
