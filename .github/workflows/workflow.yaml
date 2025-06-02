@@ -227,4 +227,4 @@ jobs:
 
       - name: Run Flyway Migrations
         run: |
-          docker run --rm --volume ${{ github.workspace }}/migrations:/flyway/sql:ro redgate/flyway -url="jdbc:postgresql://${{ needs.terraform.outputs.dbhost }}/balderdashdb" -user="${{ env.POSTGRES_USER }}" -password="${{ env.POSTGRES_PASS }}" migrate
+          docker run --rm --volume ${{ github.workspace }}/migrations:/flyway/sql:ro redgate/flyway -url="jdbc:postgresql://${{ needs.terraform.outputs.dbhost }}/tickitdb" -user="${{ env.POSTGRES_USER }}" -password="${{ env.POSTGRES_PASS }}" migrate
