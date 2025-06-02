@@ -133,7 +133,8 @@ jobs:
           EC2_HOST=${{ needs.terraform.outputs.ec2host }}
           ssh -o StrictHostKeyChecking=no -i privatekey.pem "ubuntu@$EC2_HOST" '
             mv start-serve.sh front-end-build/
-            && cd front-end-build 
+            && 
+            cd front-end-build/ 
             &&
             chmod +x start-serve.sh
           '
@@ -142,7 +143,7 @@ jobs:
         run: |
           EC2_HOST=${{ needs.terraform.outputs.ec2host }}
           ssh -o StrictHostKeyChecking=no -i privatekey.pem "ubuntu@$EC2_HOST" '
-            cd front-end-build
+            cd front-end-build/
             && 
             # Stop and delete existing pm2 process if it exists
             if pm2 list | grep -q "taskit"; then
