@@ -122,6 +122,27 @@ jobs:
             npm install
           '
 
+          ssh -o StrictHostKeyChecking=no -i privatekey.pem "ubuntu@$EC2_HOST" ' 
+            cat <<EOF > start-serve.sh
+          #!/bin/bash
+          npx serve -s dist
+          EOF
+
+      - name: Make script executable 
+        run: |
+          ssh -o StrictHostKeyChecking=no -i privatekey.pem "ubuntu@$EC2_HOST" ' 
+            chmod +x start-serve.sh
+          '
+
+      - name: Run with pm2
+        run: |
+          ssh -o StrictHostKeyChecking=no -i privatekey.pem "ubuntu@$EC2_HOST" ' 
+            # Stop and delete existing pm2 process if it exists
+            if pm2 list | grep -q "taskit"; then
+              pm2 delete taskit;
+            fi && 
+            pm2 start ./start-serve.sh --name taskit
+          '
   # build-application:
   #   name: Build application
   #   runs-on: ubuntu-latest
