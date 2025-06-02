@@ -1,0 +1,230 @@
+name: "Deployment pipeline"
+
+on:
+  push:
+    branches:
+      - main
+      - pipeline-setup
+
+jobs:
+  terraform:
+    permissions:
+      id-token: write
+      contents: read
+    name: "Manage AWS Resources"
+    runs-on: ubuntu-latest
+    outputs:
+      dbhost: ${{ steps.tf_outputs.outputs.dbhost }}
+      ec2host: ${{ steps.tf_outputs.outputs.ec2host }}
+    defaults:
+      run:
+        working-directory: terraform
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: arn:aws:iam::363615071302:role/github-role
+          aws-region: af-south-1
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.0.1
+          terraform_wrapper: false
+
+      - name: Terraform Init
+        id: init
+        run: terraform init -backend-config="bucket=tickit-bucket-state" -backend-config="key=terraformstate/terraform.tfstate" -backend-config="region=af-south-1"
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
+
+      - name: Capture Terraform Outputs
+        id: tf_outputs
+        run: |
+          echo "dbhost=$(terraform output -raw db_host)" >> $GITHUB_OUTPUT
+          echo "ec2host=$(terraform output -raw ec2_host)" >> $GITHUB_OUTPUT
+
+  # build-application:
+  #   name: Build application
+  #   runs-on: ubuntu-latest
+  #   permissions:
+  #     id-token: write
+  #     contents: read
+  #   steps:
+  #     - name: Checkout Repository
+  #       uses: actions/checkout@v4
+
+  #     - name: Install required dependencies
+  #       run: npm install
+  #       working-directory: balderdash-app
+      
+  #     - name: Compile Typescript to Javascript
+  #       run: npm run build
+  #       working-directory: balderdash-app
+
+  #     - name: Package application
+  #       working-directory: balderdash-app
+  #       run: |
+  #         mkdir -p final-build
+  #         cp -r dist final-build/
+  #         cp -r public final-build/
+  #         cp -r src final-build/
+  #         cp package.json final-build/
+  #         cd final-build
+  #         zip -r ../balderdash-build.zip .
+          
+  #     - name: Upload build artifact
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: balderdash-build
+  #         path: balderdash-app/balderdash-build.zip
+
+  # deploy-api:
+  #   name: Deploy Application to EC2
+  #   permissions:
+  #     id-token: write
+  #     contents: read
+  #   needs: 
+  #     - build-application
+  #     - terraform
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Configure AWS credentials
+  #       uses: aws-actions/configure-aws-credentials@v2
+  #       with:
+  #         role-to-assume: arn:aws:iam::363615071302:role/github-role
+  #         aws-region: af-south-1
+
+  #     - name: Get secrets from AWS Key Store
+  #       uses: aws-actions/aws-secretsmanager-get-secrets@v2
+  #       with:
+  #         secret-ids: |
+  #           EC2_PRIVATE_KEY, privatekey
+  #           CLIENT_ID, clientid
+  #           CLIENT_SECRET, clientsecret
+  #           REDIRECT_URI, redirecturi
+  #           DB_PORT, dbport
+  #           DB_HOST, dbhost
+  #           POSTGRES_USER, postgresuser
+  #           POSTGRES_PASS, postgrespass
+
+  #     - name: Download build artifact
+  #       uses: actions/download-artifact@v4
+  #       with:
+  #         name: balderdash-build
+
+  #     - name: Setup private key
+  #       run: |
+  #         echo "${{ env.EC2_PRIVATE_KEY }}" > privatekey.pem
+  #         chmod 0500 privatekey.pem
+
+  #     - name: Set env variables
+  #       run: |
+  #         EC2_HOST=${{ needs.terraform.outputs.ec2host }}
+
+  #         ssh -o StrictHostKeyChecking=no -i privatekey.pem "ubuntu@$EC2_HOST" '
+  #         cat <<EOF > .env
+  #         CLIENT_ID=${{ env.CLIENT_ID }}
+  #         CLIENT_SECRET=${{ env.CLIENT_SECRET }}
+  #         REDIRECT_URI=${{ env.REDIRECT_URI }}
+  #         DB_HOST=${{ env.DB_HOST }}
+  #         DB_PORT=${{ env.DB_PORT }}
+  #         DB_NAME=balderdashdb
+  #         DB_USERNAME=${{ env.POSTGRES_USER }}
+  #         DB_PASSWORD=${{ env.POSTGRES_PASS }}
+  #         EOF
+  #         '
+      
+  #     - name: Setup nginx proxy
+  #       run: |
+  #         EC2_HOST=${{ needs.terraform.outputs.ec2host }}
+
+  #         ssh -o StrictHostKeyChecking=no -i privatekey.pem ubuntu@$EC2_HOST 'bash -s' <<'EOF'
+  #         sudo tee /etc/nginx/sites-enabled/default > /dev/null <<'NGINX_CONF'
+  #         server {
+  #             listen 80;
+  #             server_name *.amazonaws.com;
+
+  #             # Redirect all HTTP traffic to HTTPS
+  #             return 301 https://$host$request_uri;
+  #         }
+
+  #         server {
+  #             listen 443 ssl;
+  #             server_name *.amazonaws.com;
+
+  #             ssl_certificate /etc/nginx/ssl/certificate.crt;
+  #             ssl_certificate_key /etc/nginx/ssl/privatessl.key;
+
+  #             location / {
+  #                 proxy_pass http://localhost:8080;
+  #                 proxy_set_header Host \$host;
+  #                 proxy_set_header X-Real-IP \$remote_addr;
+  #             }
+  #         }
+  #         NGINX_CONF
+  #         EOF
+
+  #     - name: Test and run nginx
+  #       run: |
+  #         EC2_HOST=${{ needs.terraform.outputs.ec2host }}
+  #         ssh -o StrictHostKeyChecking=no -i privatekey.pem "ubuntu@$EC2_HOST" '
+  #         cd /etc/nginx/sites-enabled/ &&
+  #         sudo nginx -t &&
+  #         sudo systemctl enable nginx &&
+  #         sudo systemctl restart nginx
+  #         '
+  #     - name: Deploy
+  #       run: |
+  #         EC2_HOST=${{ needs.terraform.outputs.ec2host }}
+  #         scp -o StrictHostKeyChecking=no -i privatekey.pem ./balderdash-build.zip "ubuntu@$EC2_HOST:balderdash-build.zip"
+          
+  #         ssh -o StrictHostKeyChecking=no -i privatekey.pem "ubuntu@$EC2_HOST" ' 
+  #           unzip -o balderdash-build.zip &&
+
+  #           npm install &&
+            
+  #           # Stop and delete existing pm2 process if it exists
+  #           if pm2 list | grep -q "balderdash-app"; then
+  #             pm2 delete balderdash-app;
+  #           fi &&
+            
+  #           mv .env dist/ &&
+  #           cd dist &&
+  #           pm2 start index.js --name balderdash-app
+  #        '
+
+  flyway:
+    needs:
+      - terraform
+      # - build-application
+      # - deploy-api
+    permissions:
+      id-token: write
+      contents: read
+    name: Flyway Migrations
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: arn:aws:iam::363615071302:role/github-role
+          aws-region: af-south-1
+
+      - name: Get secrets from AWS Key Store
+        uses: aws-actions/aws-secretsmanager-get-secrets@v2
+        with:
+          secret-ids: |
+            POSTGRES_USER, postgresuser
+            POSTGRES_PASS, postgrespass
+
+      - name: Run Flyway Migrations
+        run: |
+          docker run --rm --volume ${{ github.workspace }}/migrations:/flyway/sql:ro redgate/flyway -url="jdbc:postgresql://${{ needs.terraform.outputs.dbhost }}/balderdashdb" -user="${{ env.POSTGRES_USER }}" -password="${{ env.POSTGRES_PASS }}" migrate
