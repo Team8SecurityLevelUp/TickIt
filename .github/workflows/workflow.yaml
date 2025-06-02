@@ -87,6 +87,7 @@ jobs:
       contents: read
     needs: 
       - build-front-end
+      - terraform
     runs-on: ubuntu-latest
     steps:
       - name: Configure AWS credentials
