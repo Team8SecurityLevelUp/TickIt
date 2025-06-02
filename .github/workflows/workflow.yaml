@@ -72,14 +72,55 @@ jobs:
           mkdir -p front-end-build
           cp -r dist front-end-build/
           cp package.json front-end-build/
-          cd front-end-build
-          zip -r ../front-end-build.zip .
+          zip -r front-end-build.zip front-end-build
           
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
           name: front-end-build
           path: app/front-end-build.zip
+
+  deploy-api:
+    name: Deploy front-end to EC2
+    permissions:
+      id-token: write
+      contents: read
+    needs: 
+      - build-front-end
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: arn:aws:iam::363615071302:role/github-role
+          aws-region: af-south-1
+
+      - name: Get secrets from AWS Key Store
+        uses: aws-actions/aws-secretsmanager-get-secrets@v2
+        with:
+          secret-ids: |
+            EC2_PRIVATE_KEY, privatekey
+
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: front-end-build
+
+      - name: Setup private key
+        run: |
+          echo "${{ env.EC2_PRIVATE_KEY }}" > privatekey.pem
+          chmod 0500 privatekey.pem
+
+      - name: Deploy
+        run: |
+          EC2_HOST=${{ needs.terraform.outputs.ec2host }}
+          scp -o StrictHostKeyChecking=no -i privatekey.pem ./front-end-build "ubuntu@$EC2_HOST:front-end-build.zip"
+          
+          ssh -o StrictHostKeyChecking=no -i privatekey.pem "ubuntu@$EC2_HOST" ' 
+            unzip -o front-end-build.zip &&
+
+            npm install
+          '
 
   # build-application:
   #   name: Build application
