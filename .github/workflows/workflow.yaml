@@ -114,7 +114,7 @@ jobs:
       - name: Deploy
         run: |
           EC2_HOST=${{ needs.terraform.outputs.ec2host }}
-          scp -o StrictHostKeyChecking=no -i privatekey.pem ./front-end-build "ubuntu@$EC2_HOST:front-end-build.zip"
+          scp -o StrictHostKeyChecking=no -i privatekey.pem ./front-end-build.zip "ubuntu@$EC2_HOST:front-end-build.zip"
           
           ssh -o StrictHostKeyChecking=no -i privatekey.pem "ubuntu@$EC2_HOST" ' 
             unzip -o front-end-build.zip &&
