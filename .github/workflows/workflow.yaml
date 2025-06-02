@@ -123,20 +123,21 @@ jobs:
           '
 
           ssh -o StrictHostKeyChecking=no -i privatekey.pem "ubuntu@$EC2_HOST" ' 
-          sudo tee start-serve.sh > /dev/null <<'SERVE_SCRIPT'
+          cat <<EOF > start-serve.sh
           #!/bin/bash
           npx serve -s dist
-          SERVE_SCRIPT
-          EOF
+          EOF'
 
       - name: Make script executable 
         run: |
+          EC2_HOST=${{ needs.terraform.outputs.ec2host }}
           ssh -o StrictHostKeyChecking=no -i privatekey.pem "ubuntu@$EC2_HOST" ' 
             chmod +x start-serve.sh
           '
 
       - name: Run with pm2
         run: |
+          EC2_HOST=${{ needs.terraform.outputs.ec2host }}
           ssh -o StrictHostKeyChecking=no -i privatekey.pem "ubuntu@$EC2_HOST" ' 
             # Stop and delete existing pm2 process if it exists
             if pm2 list | grep -q "taskit"; then
