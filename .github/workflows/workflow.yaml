@@ -123,10 +123,11 @@ jobs:
           '
 
           ssh -o StrictHostKeyChecking=no -i privatekey.pem "ubuntu@$EC2_HOST" ' 
-          cat <<EOF > start-serve.sh
+          sudo tee start-serve.sh > /dev/null <<'SERVE_SCRIPT'
           #!/bin/bash
           npx serve -s dist
-          EOF'
+          SERVE_SCRIPT
+          EOF
 
       - name: Make script executable 
         run: |
