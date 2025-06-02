@@ -4,7 +4,7 @@ CREATE TABLE "users" (
   "username" varchar(50) NOT NULL,
   "password_hash" varchar(255) NOT NULL,
   "salt" varchar(10) NOT NULL,
-  "two_fa_secret" varchar(255)
+  "two_factor_authentication_secret" varchar(255)
 );
 
 CREATE TABLE "user_verification" (
@@ -56,6 +56,7 @@ CREATE TABLE "tasks" (
   "created_by_user_id" int NOT NULL,
   "assigned_user_id" int,
   "created_at" timestamp NOT NULL DEFAULT (now()),
+  "due_date" timestamp NOT NULL,
   "completed_at" timestamp
 );
 
