@@ -48,6 +48,38 @@ jobs:
           echo "dbhost=$(terraform output -raw db_host)" >> $GITHUB_OUTPUT
           echo "ec2host=$(terraform output -raw ec2_host)" >> $GITHUB_OUTPUT
 
+  build-front-end:
+    name: Build front-end
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install required dependencies
+        run: npm install
+        working-directory: app
+      
+      - name: Build application
+        run: npm run build
+        working-directory: app
+
+      - name: Package application
+        working-directory: app
+        run: |
+          mkdir -p front-end-build
+          cp -r dist front-end-build/
+          cp package.json front-end-build/
+          zip -r front-end-build.zip front-end-build
+          
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: front-end-build
+          path: app/front-end-build.zip
+
   # build-application:
   #   name: Build application
   #   runs-on: ubuntu-latest
