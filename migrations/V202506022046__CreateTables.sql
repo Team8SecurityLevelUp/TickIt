@@ -100,8 +100,6 @@ ALTER TABLE "task_status_history" ADD FOREIGN KEY ("new_status") REFERENCES "tas
 
 ALTER TABLE "task_status_history" ADD FOREIGN KEY ("changed_by") REFERENCES "users" ("id");
 
-ALTER TABLE "users" ADD FOREIGN KEY ("email") REFERENCES "users" ("id");
-
 --Add unique constraints
 ALTER TABLE "users" ADD CONSTRAINT "unique_email" UNIQUE ("email");
 ALTER TABLE "team_roles" ADD CONSTRAINT "unique_roles" UNIQUE ("user_id", "team_id", "role_id");
