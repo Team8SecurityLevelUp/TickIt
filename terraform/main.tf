@@ -286,7 +286,7 @@ resource "aws_budgets_budget" "team_8_budget" {
   }
 
   notification {
-    comparison_operator        = "EQUAL"
+    comparison_operator        = "EQUAL_TO"
     threshold                  = 100
     threshold_type             = "PERCENTAGE"
     notification_type          = "ACTUAL"
