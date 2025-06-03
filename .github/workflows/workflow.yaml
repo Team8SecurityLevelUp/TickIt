@@ -239,6 +239,10 @@ jobs:
           ssh -o StrictHostKeyChecking=no -i privatekey.pem "ubuntu@$EC2_HOST" ' 
             unzip -o api-build.zip &&
 
+            mv .env dist/ &&
+
+            cd api-build/ &&
+
             npm install &&
             
             # Stop and delete existing pm2 process if it exists
@@ -246,7 +250,6 @@ jobs:
               pm2 delete tickit-api;
             fi &&
             
-            mv .env dist/ &&
             cd dist &&
             pm2 start index.js --name tickit-api
           '
