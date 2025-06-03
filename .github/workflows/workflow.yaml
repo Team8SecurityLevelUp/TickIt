@@ -183,7 +183,7 @@ jobs:
           path: backend/api-build.zip
 
   deploy-api:
-    name: Deploy Application to EC2
+    name: Deploy API to EC2
     permissions:
       id-token: write
       contents: read
@@ -234,7 +234,7 @@ jobs:
       - name: Deploy
         run: |
           EC2_HOST=${{ needs.terraform.outputs.ec2host }}
-          scp -o StrictHostKeyChecking=no -i privatekey.pem ./balderdash-build.zip "ubuntu@$EC2_HOST:balderdash-build.zip"
+          scp -o StrictHostKeyChecking=no -i privatekey.pem ./api-build.zip "ubuntu@$EC2_HOST:api-build.zip"
           
           ssh -o StrictHostKeyChecking=no -i privatekey.pem "ubuntu@$EC2_HOST" ' 
             unzip -o api-build.zip &&
