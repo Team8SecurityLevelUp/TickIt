@@ -149,7 +149,7 @@ jobs:
             pm2 start ./start-serve.sh --name taskit
           '
   build-api:
-    name: Build application
+    name: Build API
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -169,7 +169,7 @@ jobs:
         working-directory: backend
 
       - name: Package application
-        working-directory: tickit-api
+        working-directory: backend
         run: |
           mkdir -p api-build
           cp -r dist api-build/
