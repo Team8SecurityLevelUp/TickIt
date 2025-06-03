@@ -239,9 +239,9 @@ jobs:
           ssh -o StrictHostKeyChecking=no -i privatekey.pem "ubuntu@$EC2_HOST" ' 
             unzip -o api-build.zip &&
 
-            mv .env dist/ &&
-
             cd api-build/ &&
+
+            mv ../.env dist/ &&
 
             npm install &&
             
