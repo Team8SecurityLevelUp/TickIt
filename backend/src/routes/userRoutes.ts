@@ -5,7 +5,7 @@ import { validateUserCreation } from "../middlewares/validateRequest";
 const router = express.Router();
 
 router.post(
-  "/", validateUserCreation, createUser
+  "/sign-up", validateUserCreation, createUser
 );
 
 export default router;
