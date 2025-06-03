@@ -143,10 +143,10 @@ jobs:
           ssh -o StrictHostKeyChecking=no -i privatekey.pem "ubuntu@$EC2_HOST" '
             cd front-end-build/ && 
             # Stop and delete existing pm2 process if it exists
-            if pm2 list | grep -q "taskit"; then
-              pm2 delete taskit;
+            if pm2 list | grep -q "tickit-front-end"; then
+              pm2 delete tickit-front-end;
             fi && 
-            pm2 start ./start-serve.sh --name taskit
+            pm2 start ./start-serve.sh --name tickit-front-end
           '
   build-api:
     name: Build API
@@ -154,8 +154,6 @@ jobs:
     permissions:
       id-token: write
       contents: read
-    needs:
-    - terraform
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4

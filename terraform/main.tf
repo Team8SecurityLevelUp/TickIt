@@ -134,6 +134,172 @@ resource "aws_instance" "tickit_ec2_instance" {
   vpc_security_group_ids = [ aws_security_group.ec2_security_group.id ]
 }
 
+resource "aws_budgets_budget" "team_8_budget" {
+  name              = "team_8_budget"
+  budget_type       = "COST"
+  limit_amount      = "50"
+  limit_unit        = "USD"
+  time_period_end   = "2025-06-14_00:00"
+  time_period_start = "2025-06-02_00:00"
+  time_unit         = "MONTHLY"
+
+  notification {
+    comparison_operator        = "EQUAL_TO"
+    threshold                  = 50
+    threshold_type             = "PERCENTAGE"
+    notification_type          = "FORECASTED"
+    subscriber_email_addresses = ["shashin.gounden@bbd.co.za", "Mnqobi.Nkabinde@bbd.co.za", "Lerato.Taunyane@bbd.co.za", "lindiwe@bbd.co.za", "rudolphe@bbdsoftware.com"]
+  }
+
+  notification {
+    comparison_operator        = "EQUAL_TO"
+    threshold                  = 75
+    threshold_type             = "PERCENTAGE"
+    notification_type          = "FORECASTED"
+    subscriber_email_addresses = ["shashin.gounden@bbd.co.za", "Mnqobi.Nkabinde@bbd.co.za", "Lerato.Taunyane@bbd.co.za", "lindiwe@bbd.co.za", "rudolphe@bbdsoftware.com"]
+  }
+
+  notification {
+    comparison_operator        = "GREATER_THAN"
+    threshold                  = 10
+    threshold_type             = "PERCENTAGE"
+    notification_type          = "ACTUAL"
+    subscriber_email_addresses = [
+      "shashin.gounden@bbd.co.za",
+      "Mnqobi.Nkabinde@bbd.co.za",
+      "Lerato.Taunyane@bbd.co.za",
+      "lindiwe@bbd.co.za",
+      "rudolphe@bbdsoftware.com"
+    ]
+  }
+
+  notification {
+    comparison_operator        = "GREATER_THAN"
+    threshold                  = 20
+    threshold_type             = "PERCENTAGE"
+    notification_type          = "ACTUAL"
+    subscriber_email_addresses = [
+      "shashin.gounden@bbd.co.za",
+      "Mnqobi.Nkabinde@bbd.co.za",
+      "Lerato.Taunyane@bbd.co.za",
+      "lindiwe@bbd.co.za",
+      "rudolphe@bbdsoftware.com"
+    ]
+  }
+
+  notification {
+    comparison_operator        = "GREATER_THAN"
+    threshold                  = 30
+    threshold_type             = "PERCENTAGE"
+    notification_type          = "ACTUAL"
+    subscriber_email_addresses = [
+      "shashin.gounden@bbd.co.za",
+      "Mnqobi.Nkabinde@bbd.co.za",
+      "Lerato.Taunyane@bbd.co.za",
+      "lindiwe@bbd.co.za",
+      "rudolphe@bbdsoftware.com"
+    ]
+  }
+
+  notification {
+    comparison_operator        = "GREATER_THAN"
+    threshold                  = 40
+    threshold_type             = "PERCENTAGE"
+    notification_type          = "ACTUAL"
+    subscriber_email_addresses = [
+      "shashin.gounden@bbd.co.za",
+      "Mnqobi.Nkabinde@bbd.co.za",
+      "Lerato.Taunyane@bbd.co.za",
+      "lindiwe@bbd.co.za",
+      "rudolphe@bbdsoftware.com"
+    ]
+  }
+
+  notification {
+    comparison_operator        = "GREATER_THAN"
+    threshold                  = 50
+    threshold_type             = "PERCENTAGE"
+    notification_type          = "ACTUAL"
+    subscriber_email_addresses = [
+      "shashin.gounden@bbd.co.za",
+      "Mnqobi.Nkabinde@bbd.co.za",
+      "Lerato.Taunyane@bbd.co.za",
+      "lindiwe@bbd.co.za",
+      "rudolphe@bbdsoftware.com"
+    ]
+  }
+
+  notification {
+    comparison_operator        = "GREATER_THAN"
+    threshold                  = 60
+    threshold_type             = "PERCENTAGE"
+    notification_type          = "ACTUAL"
+    subscriber_email_addresses = [
+      "shashin.gounden@bbd.co.za",
+      "Mnqobi.Nkabinde@bbd.co.za",
+      "Lerato.Taunyane@bbd.co.za",
+      "lindiwe@bbd.co.za",
+      "rudolphe@bbdsoftware.com"
+    ]
+  }
+
+  notification {
+    comparison_operator        = "GREATER_THAN"
+    threshold                  = 70
+    threshold_type             = "PERCENTAGE"
+    notification_type          = "ACTUAL"
+    subscriber_email_addresses = [
+      "shashin.gounden@bbd.co.za",
+      "Mnqobi.Nkabinde@bbd.co.za",
+      "Lerato.Taunyane@bbd.co.za",
+      "lindiwe@bbd.co.za",
+      "rudolphe@bbdsoftware.com"
+    ]
+  }
+
+  notification {
+    comparison_operator        = "GREATER_THAN"
+    threshold                  = 80
+    threshold_type             = "PERCENTAGE"
+    notification_type          = "ACTUAL"
+    subscriber_email_addresses = [
+      "shashin.gounden@bbd.co.za",
+      "Mnqobi.Nkabinde@bbd.co.za",
+      "Lerato.Taunyane@bbd.co.za",
+      "lindiwe@bbd.co.za",
+      "rudolphe@bbdsoftware.com"
+    ]
+  }
+
+  notification {
+    comparison_operator        = "GREATER_THAN"
+    threshold                  = 90
+    threshold_type             = "PERCENTAGE"
+    notification_type          = "ACTUAL"
+    subscriber_email_addresses = [
+      "shashin.gounden@bbd.co.za",
+      "Mnqobi.Nkabinde@bbd.co.za",
+      "Lerato.Taunyane@bbd.co.za",
+      "lindiwe@bbd.co.za",
+      "rudolphe@bbdsoftware.com"
+    ]
+  }
+
+  notification {
+    comparison_operator        = "EQUAL"
+    threshold                  = 100
+    threshold_type             = "PERCENTAGE"
+    notification_type          = "ACTUAL"
+    subscriber_email_addresses = [
+      "shashin.gounden@bbd.co.za",
+      "Mnqobi.Nkabinde@bbd.co.za",
+      "Lerato.Taunyane@bbd.co.za",
+      "lindiwe@bbd.co.za",
+      "rudolphe@bbdsoftware.com"
+    ]
+  }
+}
+
 resource "aws_eip" "tickit_ec2_eip" {
   instance = aws_instance.tickit_ec2_instance.id
   domain   = "vpc"
