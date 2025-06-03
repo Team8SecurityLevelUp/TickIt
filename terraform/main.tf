@@ -148,7 +148,7 @@ resource "aws_budgets_budget" "team_8_budget" {
     threshold                  = 50
     threshold_type             = "PERCENTAGE"
     notification_type          = "FORECASTED"
-    subscriber_email_addresses = ["shashin.gounden@bbd.co.za", "Mnqobi.Nkabinde@bbd.co.za", "Lerato.Taunyane@bbd.co.za", "lindiwe@bbd.co.za", "rudolphe@bbdsoftware.com"]
+    subscriber_email_addresses = var.budget_notification_emails
   }
 
   notification {
@@ -156,7 +156,7 @@ resource "aws_budgets_budget" "team_8_budget" {
     threshold                  = 75
     threshold_type             = "PERCENTAGE"
     notification_type          = "FORECASTED"
-    subscriber_email_addresses = ["shashin.gounden@bbd.co.za", "Mnqobi.Nkabinde@bbd.co.za", "Lerato.Taunyane@bbd.co.za", "lindiwe@bbd.co.za", "rudolphe@bbdsoftware.com"]
+    subscriber_email_addresses = var.budget_notification_emails
   }
 
   notification {
@@ -164,13 +164,7 @@ resource "aws_budgets_budget" "team_8_budget" {
     threshold                  = 10
     threshold_type             = "PERCENTAGE"
     notification_type          = "ACTUAL"
-    subscriber_email_addresses = [
-      "shashin.gounden@bbd.co.za",
-      "Mnqobi.Nkabinde@bbd.co.za",
-      "Lerato.Taunyane@bbd.co.za",
-      "lindiwe@bbd.co.za",
-      "rudolphe@bbdsoftware.com"
-    ]
+    subscriber_email_addresses = var.budget_notification_emails
   }
 
   notification {
@@ -178,13 +172,7 @@ resource "aws_budgets_budget" "team_8_budget" {
     threshold                  = 20
     threshold_type             = "PERCENTAGE"
     notification_type          = "ACTUAL"
-    subscriber_email_addresses = [
-      "shashin.gounden@bbd.co.za",
-      "Mnqobi.Nkabinde@bbd.co.za",
-      "Lerato.Taunyane@bbd.co.za",
-      "lindiwe@bbd.co.za",
-      "rudolphe@bbdsoftware.com"
-    ]
+    subscriber_email_addresses = var.budget_notification_emails
   }
 
   notification {
@@ -192,13 +180,7 @@ resource "aws_budgets_budget" "team_8_budget" {
     threshold                  = 30
     threshold_type             = "PERCENTAGE"
     notification_type          = "ACTUAL"
-    subscriber_email_addresses = [
-      "shashin.gounden@bbd.co.za",
-      "Mnqobi.Nkabinde@bbd.co.za",
-      "Lerato.Taunyane@bbd.co.za",
-      "lindiwe@bbd.co.za",
-      "rudolphe@bbdsoftware.com"
-    ]
+    subscriber_email_addresses = var.budget_notification_emails
   }
 
   notification {
@@ -206,13 +188,7 @@ resource "aws_budgets_budget" "team_8_budget" {
     threshold                  = 40
     threshold_type             = "PERCENTAGE"
     notification_type          = "ACTUAL"
-    subscriber_email_addresses = [
-      "shashin.gounden@bbd.co.za",
-      "Mnqobi.Nkabinde@bbd.co.za",
-      "Lerato.Taunyane@bbd.co.za",
-      "lindiwe@bbd.co.za",
-      "rudolphe@bbdsoftware.com"
-    ]
+    subscriber_email_addresses = var.budget_notification_emails
   }
 
   notification {
@@ -220,13 +196,7 @@ resource "aws_budgets_budget" "team_8_budget" {
     threshold                  = 50
     threshold_type             = "PERCENTAGE"
     notification_type          = "ACTUAL"
-    subscriber_email_addresses = [
-      "shashin.gounden@bbd.co.za",
-      "Mnqobi.Nkabinde@bbd.co.za",
-      "Lerato.Taunyane@bbd.co.za",
-      "lindiwe@bbd.co.za",
-      "rudolphe@bbdsoftware.com"
-    ]
+    subscriber_email_addresses = var.budget_notification_emails
   }
 
   notification {
@@ -234,13 +204,7 @@ resource "aws_budgets_budget" "team_8_budget" {
     threshold                  = 60
     threshold_type             = "PERCENTAGE"
     notification_type          = "ACTUAL"
-    subscriber_email_addresses = [
-      "shashin.gounden@bbd.co.za",
-      "Mnqobi.Nkabinde@bbd.co.za",
-      "Lerato.Taunyane@bbd.co.za",
-      "lindiwe@bbd.co.za",
-      "rudolphe@bbdsoftware.com"
-    ]
+    subscriber_email_addresses = var.budget_notification_emails
   }
 
   notification {
@@ -248,13 +212,7 @@ resource "aws_budgets_budget" "team_8_budget" {
     threshold                  = 80
     threshold_type             = "PERCENTAGE"
     notification_type          = "ACTUAL"
-    subscriber_email_addresses = [
-      "shashin.gounden@bbd.co.za",
-      "Mnqobi.Nkabinde@bbd.co.za",
-      "Lerato.Taunyane@bbd.co.za",
-      "lindiwe@bbd.co.za",
-      "rudolphe@bbdsoftware.com"
-    ]
+    subscriber_email_addresses = var.budget_notification_emails
   }
 
   notification {
@@ -262,13 +220,7 @@ resource "aws_budgets_budget" "team_8_budget" {
     threshold                  = 90
     threshold_type             = "PERCENTAGE"
     notification_type          = "ACTUAL"
-    subscriber_email_addresses = [
-      "shashin.gounden@bbd.co.za",
-      "Mnqobi.Nkabinde@bbd.co.za",
-      "Lerato.Taunyane@bbd.co.za",
-      "lindiwe@bbd.co.za",
-      "rudolphe@bbdsoftware.com"
-    ]
+    subscriber_email_addresses = var.budget_notification_emails
   }
 }
 
