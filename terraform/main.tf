@@ -245,20 +245,6 @@ resource "aws_budgets_budget" "team_8_budget" {
 
   notification {
     comparison_operator        = "GREATER_THAN"
-    threshold                  = 70
-    threshold_type             = "PERCENTAGE"
-    notification_type          = "ACTUAL"
-    subscriber_email_addresses = [
-      "shashin.gounden@bbd.co.za",
-      "Mnqobi.Nkabinde@bbd.co.za",
-      "Lerato.Taunyane@bbd.co.za",
-      "lindiwe@bbd.co.za",
-      "rudolphe@bbdsoftware.com"
-    ]
-  }
-
-  notification {
-    comparison_operator        = "GREATER_THAN"
     threshold                  = 80
     threshold_type             = "PERCENTAGE"
     notification_type          = "ACTUAL"
@@ -274,20 +260,6 @@ resource "aws_budgets_budget" "team_8_budget" {
   notification {
     comparison_operator        = "GREATER_THAN"
     threshold                  = 90
-    threshold_type             = "PERCENTAGE"
-    notification_type          = "ACTUAL"
-    subscriber_email_addresses = [
-      "shashin.gounden@bbd.co.za",
-      "Mnqobi.Nkabinde@bbd.co.za",
-      "Lerato.Taunyane@bbd.co.za",
-      "lindiwe@bbd.co.za",
-      "rudolphe@bbdsoftware.com"
-    ]
-  }
-
-  notification {
-    comparison_operator        = "EQUAL_TO"
-    threshold                  = 100
     threshold_type             = "PERCENTAGE"
     notification_type          = "ACTUAL"
     subscriber_email_addresses = [
