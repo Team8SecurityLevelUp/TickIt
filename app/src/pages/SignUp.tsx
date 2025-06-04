@@ -99,14 +99,14 @@ export const Signup = () => {
           className='auth-form'
         >
           <h1 className='auth-title'>Verify Your Email</h1>
-          <p>We've sent a verification link to 
+          <p>We've sent a verification link to &nbsp;
             <strong>
               {email}
             </strong>
           </p>
           <p>Please check your inbox to completed your signup.</p>
           <p>
-            Once verified, you can 
+            Once verified, you can &nbsp;
               <Link
                 to='/login'
               >

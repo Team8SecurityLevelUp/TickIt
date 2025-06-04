@@ -1,5 +1,8 @@
+import jwt from 'jsonwebtoken';
+import dotenv from 'dotenv';
 import { Request, Response, NextFunction } from 'express';
 import { registerUser, verifyEmailToken, authenticateUser } from '../services/userService';
+import { getVerifiedUserByEmail } from '../repositories/userRepository';
 
 export const createUser = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -62,5 +65,33 @@ export const loginUser = async (req: Request, res: Response, next: NextFunction)
     res.status(200).json({ user });
   } catch (err) {
     next(err);
+  }
+};
+
+export const getAuthenticatedUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  const token = req.cookies.token;
+
+  if (!token) {
+    res.status(401).json({ user: null });
+  }
+
+  try {
+    const JWT_SECRET = process.env.JWT_SECRET;
+    if (!JWT_SECRET) throw new Error('Missing JWT_SECRET');
+    const decoded = jwt.verify(token, JWT_SECRET) as { email: string };
+
+    const user = await getVerifiedUserByEmail(decoded.email);
+    if (!user) {
+      res.status(401).json({ user: null });
+    }
+
+    res.status(200).json({
+      user: {
+        email: user.email,
+        username: user.username,
+      },
+    });
+  } catch (err) {
+    res.status(401).json({ user: null });
   }
 };
