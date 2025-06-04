@@ -1,17 +1,17 @@
-import { Link, useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import React from 'react';
 import { fetcher } from '../utils/fetcher';
 import { Loading } from '../components/Loading';
 import { useAuth } from '../auth/useAuth';
 import './AuthPages.css';
 
 export const Signup = () => {
-  const navigate = useNavigate();
   const { loading } = useAuth();
-  const [username, setUsername] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [formError, setFormError] = useState('');
+  const [username, setUsername] = React.useState('');
+  const [email, setEmail] = React.useState('');
+  const [password, setPassword] = React.useState('');
+  const [formError, setFormError] = React.useState('');
+  const [signupSuccess, setSignupSuccess] = React.useState(false);
 
   if (loading) return <Loading />;
 
@@ -22,7 +22,7 @@ export const Signup = () => {
       method: 'POST',
       body: { username, email, password },
     })
-      .then(() => navigate('/login'))
+      .then(() => setSignupSuccess(true))
       .catch((err: { message?: string }) => {
         setFormError(err.message || 'Signup failed');
       });
@@ -32,7 +32,8 @@ export const Signup = () => {
     <main 
       className='auth-wrapper'
     >
-      <form
+    
+      {!signupSuccess && (<form
         className='auth-form'
         onSubmit={(e) => e.preventDefault()}
       >
@@ -92,7 +93,29 @@ export const Signup = () => {
             Login
           </Link>
         </p>
-      </form>
+      </form>) ||
+      (
+        <section 
+          className='auth-form'
+        >
+          <h1 className='auth-title'>Verify Your Email</h1>
+          <p>We've sent a verification link to &nbsp;
+            <strong>
+              {email}
+            </strong>
+          </p>
+          <p>Please check your inbox to completed your signup.</p>
+          <p>
+            Once verified, you can &nbsp;
+              <Link
+                to='/login'
+              >
+                log in here
+              </Link>.
+          </p>
+        </section>
+      )
+      }
     </main>
   );
 };

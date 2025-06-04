@@ -1,3 +1,7 @@
+import { useAuth } from "./auth/useAuth"
+
 export const App = () => {
-  return <h1>Hello TickIt</h1>
+  const user = useAuth();
+  console.log(user);
+  return <h1>Hello {user?.user?.username ?? 'User'} thank you using TickIt</h1>
 }
