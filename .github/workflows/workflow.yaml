@@ -48,161 +48,215 @@ jobs:
           echo "dbhost=$(terraform output -raw db_host)" >> $GITHUB_OUTPUT
           echo "ec2host=$(terraform output -raw ec2_host)" >> $GITHUB_OUTPUT
 
-  # build-application:
-  #   name: Build application
-  #   runs-on: ubuntu-latest
-  #   permissions:
-  #     id-token: write
-  #     contents: read
-  #   steps:
-  #     - name: Checkout Repository
-  #       uses: actions/checkout@v4
+  build-front-end:
+    name: Build front-end
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-  #     - name: Install required dependencies
-  #       run: npm install
-  #       working-directory: balderdash-app
+      - name: Install required dependencies
+        run: npm install
+        working-directory: app
       
-  #     - name: Compile Typescript to Javascript
-  #       run: npm run build
-  #       working-directory: balderdash-app
+      - name: Build application
+        run: npm run build
+        working-directory: app
 
-  #     - name: Package application
-  #       working-directory: balderdash-app
-  #       run: |
-  #         mkdir -p final-build
-  #         cp -r dist final-build/
-  #         cp -r public final-build/
-  #         cp -r src final-build/
-  #         cp package.json final-build/
-  #         cd final-build
-  #         zip -r ../balderdash-build.zip .
+      - name: Package application
+        working-directory: app
+        run: |
+          mkdir -p front-end-build
+          cp -r dist front-end-build/
+          cp package.json front-end-build/
+          zip -r front-end-build.zip front-end-build
           
-  #     - name: Upload build artifact
-  #       uses: actions/upload-artifact@v4
-  #       with:
-  #         name: balderdash-build
-  #         path: balderdash-app/balderdash-build.zip
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: front-end-build
+          path: app/front-end-build.zip
 
-  # deploy-api:
-  #   name: Deploy Application to EC2
-  #   permissions:
-  #     id-token: write
-  #     contents: read
-  #   needs: 
-  #     - build-application
-  #     - terraform
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Configure AWS credentials
-  #       uses: aws-actions/configure-aws-credentials@v2
-  #       with:
-  #         role-to-assume: arn:aws:iam::363615071302:role/github-role
-  #         aws-region: af-south-1
+  deploy-frontend:
+    name: Deploy front-end to EC2
+    permissions:
+      id-token: write
+      contents: read
+    needs: 
+      - build-front-end
+      - terraform
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: arn:aws:iam::363615071302:role/github-role
+          aws-region: af-south-1
 
-  #     - name: Get secrets from AWS Key Store
-  #       uses: aws-actions/aws-secretsmanager-get-secrets@v2
-  #       with:
-  #         secret-ids: |
-  #           EC2_PRIVATE_KEY, privatekey
-  #           CLIENT_ID, clientid
-  #           CLIENT_SECRET, clientsecret
-  #           REDIRECT_URI, redirecturi
-  #           DB_PORT, dbport
-  #           DB_HOST, dbhost
-  #           POSTGRES_USER, postgresuser
-  #           POSTGRES_PASS, postgrespass
+      - name: Get secrets from AWS Key Store
+        uses: aws-actions/aws-secretsmanager-get-secrets@v2
+        with:
+          secret-ids: |
+            EC2_PRIVATE_KEY, privatekey
 
-  #     - name: Download build artifact
-  #       uses: actions/download-artifact@v4
-  #       with:
-  #         name: balderdash-build
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: front-end-build
 
-  #     - name: Setup private key
-  #       run: |
-  #         echo "${{ env.EC2_PRIVATE_KEY }}" > privatekey.pem
-  #         chmod 0500 privatekey.pem
+      - name: Setup private key
+        run: |
+          echo "${{ env.EC2_PRIVATE_KEY }}" > privatekey.pem
+          chmod 0500 privatekey.pem
 
-  #     - name: Set env variables
-  #       run: |
-  #         EC2_HOST=${{ needs.terraform.outputs.ec2host }}
+      - name: Deploy
+        run: |
+          EC2_HOST=${{ needs.terraform.outputs.ec2host }}
+          scp -o StrictHostKeyChecking=no -i privatekey.pem ./front-end-build.zip "ubuntu@$EC2_HOST:front-end-build.zip"
+          
+          ssh -o StrictHostKeyChecking=no -i privatekey.pem "ubuntu@$EC2_HOST" ' 
+            unzip -o front-end-build.zip && cd front-end-build/ &&
+            npm install
+          '
 
-  #         ssh -o StrictHostKeyChecking=no -i privatekey.pem "ubuntu@$EC2_HOST" '
-  #         cat <<EOF > .env
-  #         CLIENT_ID=${{ env.CLIENT_ID }}
-  #         CLIENT_SECRET=${{ env.CLIENT_SECRET }}
-  #         REDIRECT_URI=${{ env.REDIRECT_URI }}
-  #         DB_HOST=${{ env.DB_HOST }}
-  #         DB_PORT=${{ env.DB_PORT }}
-  #         DB_NAME=balderdashdb
-  #         DB_USERNAME=${{ env.POSTGRES_USER }}
-  #         DB_PASSWORD=${{ env.POSTGRES_PASS }}
-  #         EOF
-  #         '
+          ssh -o StrictHostKeyChecking=no -i privatekey.pem "ubuntu@$EC2_HOST" ' 
+          cat <<EOF > start-serve.sh
+          #!/bin/bash
+          npx serve -s dist
+          EOF'
+
+      - name: Make script executable 
+        run: |
+          EC2_HOST=${{ needs.terraform.outputs.ec2host }}
+          ssh -o StrictHostKeyChecking=no -i privatekey.pem "ubuntu@$EC2_HOST" '
+            mv start-serve.sh front-end-build/ && 
+            cd front-end-build/ &&
+            chmod +x start-serve.sh
+          '
+
+      - name: Run with pm2
+        run: |
+          EC2_HOST=${{ needs.terraform.outputs.ec2host }}
+          ssh -o StrictHostKeyChecking=no -i privatekey.pem "ubuntu@$EC2_HOST" '
+            cd front-end-build/ && 
+            # Stop and delete existing pm2 process if it exists
+            if pm2 list | grep -q "tickit-front-end"; then
+              pm2 delete tickit-front-end;
+            fi && 
+            pm2 start ./start-serve.sh --name tickit-front-end
+          '
+  build-api:
+    name: Build API
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install required dependencies
+        run: npm install
+        working-directory: backend
       
-  #     - name: Setup nginx proxy
-  #       run: |
-  #         EC2_HOST=${{ needs.terraform.outputs.ec2host }}
+      - name: Compile Typescript to Javascript
+        run: npm run build
+        working-directory: backend
 
-  #         ssh -o StrictHostKeyChecking=no -i privatekey.pem ubuntu@$EC2_HOST 'bash -s' <<'EOF'
-  #         sudo tee /etc/nginx/sites-enabled/default > /dev/null <<'NGINX_CONF'
-  #         server {
-  #             listen 80;
-  #             server_name *.amazonaws.com;
-
-  #             # Redirect all HTTP traffic to HTTPS
-  #             return 301 https://$host$request_uri;
-  #         }
-
-  #         server {
-  #             listen 443 ssl;
-  #             server_name *.amazonaws.com;
-
-  #             ssl_certificate /etc/nginx/ssl/certificate.crt;
-  #             ssl_certificate_key /etc/nginx/ssl/privatessl.key;
-
-  #             location / {
-  #                 proxy_pass http://localhost:8080;
-  #                 proxy_set_header Host \$host;
-  #                 proxy_set_header X-Real-IP \$remote_addr;
-  #             }
-  #         }
-  #         NGINX_CONF
-  #         EOF
-
-  #     - name: Test and run nginx
-  #       run: |
-  #         EC2_HOST=${{ needs.terraform.outputs.ec2host }}
-  #         ssh -o StrictHostKeyChecking=no -i privatekey.pem "ubuntu@$EC2_HOST" '
-  #         cd /etc/nginx/sites-enabled/ &&
-  #         sudo nginx -t &&
-  #         sudo systemctl enable nginx &&
-  #         sudo systemctl restart nginx
-  #         '
-  #     - name: Deploy
-  #       run: |
-  #         EC2_HOST=${{ needs.terraform.outputs.ec2host }}
-  #         scp -o StrictHostKeyChecking=no -i privatekey.pem ./balderdash-build.zip "ubuntu@$EC2_HOST:balderdash-build.zip"
+      - name: Package application
+        working-directory: backend
+        run: |
+          mkdir -p api-build
+          cp -r dist api-build/
+          cp package.json api-build/
+          zip -r api-build.zip api-build
           
-  #         ssh -o StrictHostKeyChecking=no -i privatekey.pem "ubuntu@$EC2_HOST" ' 
-  #           unzip -o balderdash-build.zip &&
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-build
+          path: backend/api-build.zip
 
-  #           npm install &&
+  deploy-api:
+    name: Deploy API to EC2
+    permissions:
+      id-token: write
+      contents: read
+    needs: 
+      - build-api
+      - terraform
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: arn:aws:iam::363615071302:role/github-role
+          aws-region: af-south-1
+
+      - name: Get secrets from AWS Key Store
+        uses: aws-actions/aws-secretsmanager-get-secrets@v2
+        with:
+          secret-ids: |
+            EC2_PRIVATE_KEY, privatekey
+            DB_HOST, dbhost
+            DB_NAME, dbname
+            POSTGRES_USER, postgresuser
+            POSTGRES_PASS, postgrespass
+
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: api-build
+
+      - name: Setup private key
+        run: |
+          echo "${{ env.EC2_PRIVATE_KEY }}" > privatekey.pem
+          chmod 0500 privatekey.pem
+
+      - name: Set env variables
+        run: |
+          EC2_HOST=${{ needs.terraform.outputs.ec2host }}
+
+          ssh -o StrictHostKeyChecking=no -i privatekey.pem "ubuntu@$EC2_HOST" '
+          cat <<EOF > .env
+          DB_HOST=${{ env.DB_HOST }}
+          DB_NAME=${{ env.DB_NAME }}
+          DB_USER=${{ env.POSTGRES_USER }}
+          DB_PASSWORD=${{ env.POSTGRES_PASS }}
+          EOF
+          '
+      
+      - name: Deploy
+        run: |
+          EC2_HOST=${{ needs.terraform.outputs.ec2host }}
+          scp -o StrictHostKeyChecking=no -i privatekey.pem ./api-build.zip "ubuntu@$EC2_HOST:api-build.zip"
+          
+          ssh -o StrictHostKeyChecking=no -i privatekey.pem "ubuntu@$EC2_HOST" ' 
+            unzip -o api-build.zip &&
+
+            cd api-build/ &&
+
+            mv ../.env dist/ &&
+
+            npm install &&
             
-  #           # Stop and delete existing pm2 process if it exists
-  #           if pm2 list | grep -q "balderdash-app"; then
-  #             pm2 delete balderdash-app;
-  #           fi &&
+            # Stop and delete existing pm2 process if it exists
+            if pm2 list | grep -q "tickit-api"; then
+              pm2 delete tickit-api;
+            fi &&
             
-  #           mv .env dist/ &&
-  #           cd dist &&
-  #           pm2 start index.js --name balderdash-app
-  #        '
+            cd dist &&
+            pm2 start index.js --name tickit-api
+          '
 
   flyway:
     needs:
       - terraform
-      # - build-application
-      # - deploy-api
+      - deploy-frontend
+      - deploy-api
     permissions:
       id-token: write
       contents: read
