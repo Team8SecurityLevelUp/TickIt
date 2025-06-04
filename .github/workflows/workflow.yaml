@@ -30,6 +30,19 @@ jobs:
           role-to-assume: arn:aws:iam::363615071302:role/github-role
           aws-region: af-south-1
 
+      - name: Ensure S3 bucket exists for backend
+        run: |
+          BUCKET_NAME="tickit-bucket-state"
+          REGION="af-south-1"
+
+          if ! aws s3api head-bucket --bucket "$BUCKET_NAME" 2>/dev/null; then
+            echo "Bucket does not exist. Creating..."
+            aws s3api create-bucket --bucket "$BUCKET_NAME" --region "$REGION" \
+              --create-bucket-configuration LocationConstraint="$REGION"
+          else
+            echo "Bucket already exists."
+          fi
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
