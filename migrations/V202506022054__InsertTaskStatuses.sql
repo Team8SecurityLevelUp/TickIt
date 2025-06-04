@@ -2,5 +2,6 @@ INSERT INTO "task_statuses" ("status")
 VALUES 
   ('To-Do'),
   ('In-Progress'),
-  ('Done')
+  ('Done'),
+  ('Deleted')
 ON CONFLICT ("status") DO NOTHING;
