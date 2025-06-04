@@ -23,14 +23,6 @@ export const sendVerificationEmail = async (to: string, token: string) => {
       <p>Please click the button below to verify your email:</p>
       <a 
         href="http://localhost:3000/api/user/verify-email?email=${encodeURIComponent(to)}&token=${token}"
-        style="
-          display: inline-block;
-          padding: 10px 20px;
-          background-color: #2563eb;
-          color: white;
-          border-radius: 4px;
-          font-weight: bold;
-        "
       >
         Verify Email
       </a>

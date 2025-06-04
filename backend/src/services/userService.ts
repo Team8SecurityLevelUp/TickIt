@@ -9,6 +9,7 @@ getUnverifiedUserWithPendingToken,
 updateUnverifiedUser
 } from '../repositories/userRepository';
 import * as bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 import { sendVerificationEmail } from '../utils/emailSender';
 
 export const registerUser = async (username: string, password: string, email: string) => {
@@ -66,9 +67,18 @@ export const authenticateUser = async (email: string, password: string) => {
   const match = await bcrypt.compare(password, user.password_hash);
   if (!match) return null;
 
-  return {
+  const payload = {
     email: user.email,
     username: user.username,
+    sub: user.id,
   };
-};
 
+  const JWT_SECRET = process.env.JWT_SECRET;
+  if (!JWT_SECRET) {
+    throw new Error('Missing JWT_SECRET in environment variables');
+  }
+
+  const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '1h' });
+
+  return { token, user: { email: user.email, username: user.username } };
+};

@@ -44,17 +44,19 @@ export const loginUser = async (req: Request, res: Response, next: NextFunction)
       return;
     }
 
-    const user = await authenticateUser(email, password);
-    if (!user) {
+    const result = await authenticateUser(email, password);
+    if (!result) {
       res.status(401).json({ message: 'Invalid credentials or email not verified' });
       return;
     }
 
-    // TODO: Later I will replace this with a real JWT or secure cookie. IDK
-    res.cookie('token', 'FAKE_TOKEN_123', {
+    const { token, user } = result;
+
+    res.cookie('token', token, {
       httpOnly: true,
       sameSite: 'lax',
-      secure: false,
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 1000 * 60 * 60,
     });
 
     res.status(200).json({ user });

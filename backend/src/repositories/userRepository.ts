@@ -35,7 +35,7 @@ export const getUserByEmail = async (email: string) => {
 
 export const getVerifiedUserByEmail = async (email: string) => {
   const result = await db.query(
-    `SELECT u.password_hash, u.email, u.username
+    `SELECT u.password_hash, u.email, u.username, two_factor_authentication_secret
      FROM users u
      JOIN user_verification uv ON uv.user_id = u.id
      WHERE u.email = $1
