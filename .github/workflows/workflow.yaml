@@ -290,6 +290,11 @@ jobs:
         listen 80;
         server_name bbd-grad-project.co.za www.bbd-grad-project.co.za;
 
+        # Required for Certbot's HTTP-01 challenge
+        location /.well-known/acme-challenge/ {
+            root /var/www/html;
+        }
+
         location / {
             proxy_pass http://localhost:3000; # Front-end
             proxy_http_version 1.1;
