@@ -350,7 +350,7 @@ jobs:
       run: |
         EC2_HOST=${{ needs.terraform.outputs.ec2host }}
         ssh -o StrictHostKeyChecking=no -i privatekey.pem "ubuntu@$EC2_HOST" ' 
-          sudo apt install certbot python3-certbot-nginx &&
+          sudo apt install certbot python3-certbot-nginx -y &&
           sudo certbot --nginx -d bbd-grad-project.co.za -d www.bbd-grad-project.co.za --non-interactive --agree-tos --email shashin.gounden@bbd.co.za
         '
             
