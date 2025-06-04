@@ -11,37 +11,86 @@ export const Signup = () => {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [formError, setFormError] = useState('');
 
   if (loading) return <Loading />;
 
   const signup = () => {
-    fetcher('/signup', {
+    setFormError('');
+
+    fetcher('/user/sign-up/', {
       method: 'POST',
       body: { username, email, password },
     })
       .then(() => navigate('/login'))
-      .catch(() => alert('Signup failed'));
+      .catch((err: { message?: string }) => {
+        setFormError(err.message || 'Signup failed');
+      });
   };
 
-  // TODO add better error handling
   return (
-    <main className='auth-wrapper'>
-      <form className='auth-form' onSubmit={(e) => e.preventDefault()}>
-        <h1 className='auth-title'>Sign Up</h1>
+    <main 
+      className='auth-wrapper'
+    >
+      <form
+        className='auth-form'
+        onSubmit={(e) => e.preventDefault()}
+      >
+        <h1
+          className='auth-title'
+        >
+          Sign Up
+        </h1>
 
-        <label htmlFor='username'>Username</label>
-        <input id='username' type='text' value={username} onChange={(e) => setUsername(e.target.value)} required />
+        <label >
+          Username
+        </label>
+        <input
+          type='text'
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+        />
 
-        <label htmlFor='email'>Email</label>
-        <input id='email' type='email' value={email} onChange={(e) => setEmail(e.target.value)} required />
+        <label>
+          Email
+        </label>
+        <input
+          type='email'
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
 
-        <label htmlFor='password'>Password</label>
-        <input id='password' type='password' value={password} onChange={(e) => setPassword(e.target.value)} required />
+        <label>
+          Password
+        </label>
+        <input
+          type='password'
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
 
-        <button type='submit' onClick={signup}>Sign Up</button>
+        {formError && (
+          <p
+            role='alert'
+          >
+            {formError}
+          </p>
+        )}
+
+        <button 
+          type='submit'
+          onClick={signup}
+        >
+          Sign Up
+        </button>
 
         <p>
-          Already have an account? <Link to='/login'>Login</Link>
+          Already have an account? 
+          <Link 
+            to='/login'
+          >
+            Login
+          </Link>
         </p>
       </form>
     </main>

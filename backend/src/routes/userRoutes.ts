@@ -1,11 +1,19 @@
-import * as express from "express";
-import { createUser } from "../controllers/userController";
+import express from "express";
+import { createUser, loginUser, verifyEmail } from "../controllers/userController";
 import { validateUserCreation } from "../middlewares/validateRequest";
 
 const router = express.Router();
 
 router.post(
-  "/", validateUserCreation, createUser
+  "/sign-up", validateUserCreation, createUser
+);
+
+router.post(
+  '/verify-email', verifyEmail
+);
+
+router.post(
+  '/login', loginUser
 );
 
 export default router;
