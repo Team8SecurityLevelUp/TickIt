@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - develop
       - pipeline-setup
 
 jobs:
@@ -252,6 +253,71 @@ jobs:
             pm2 start index.js --name tickit-api
           '
 
+  issue-certificates:
+    needs:
+    - deploy-api 
+    permissions:
+        id-token: write
+        contents: read
+    name: Issue Certificates
+    runs-on: ubuntu-latest
+    steps:
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        role-to-assume: arn:aws:iam::363615071302:role/github-role
+        aws-region: af-south-1
+
+    - name: Get secrets from AWS Key Store
+      uses: aws-actions/aws-secretsmanager-get-secrets@v2
+      with:
+        secret-ids: |
+          EC2_PRIVATE_KEY, privatekey
+
+    - name: Setup private key
+      run: |
+        echo "${{ env.EC2_PRIVATE_KEY }}" > privatekey.pem
+        chmod 0500 privatekey.pem
+
+    - name: Setup nginx proxy
+      run: |
+        EC2_HOST=${{ needs.terraform.outputs.ec2host }}
+
+        ssh -o StrictHostKeyChecking=no -i privatekey.pem ubuntu@$EC2_HOST 'bash -s' <<'EOF'
+        sudo tee /etc/nginx/sites-enabled/default > /dev/null <<'NGINX_CONF'
+        server {
+        listen 80;
+        server_name bbd-grad-project.co.za www.bbd-grad-project.co.za;
+
+        location / {
+            proxy_pass http://localhost:3000; # Front-end
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection 'upgrade';
+            proxy_set_header Host $host;
+            proxy_cache_bypass $http_upgrade;
+        }
+
+        location /api/ {
+            proxy_pass http://localhost:5000; # API
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection 'upgrade';
+            proxy_set_header Host $host;
+            proxy_cache_bypass $http_upgrade;
+        }
+        }
+        NGINX_CONF
+        EOF
+
+    - name: Cerbot
+      run: |
+        EC2_HOST=${{ needs.terraform.outputs.ec2host }}
+        ssh -o StrictHostKeyChecking=no -i privatekey.pem "ubuntu@$EC2_HOST" ' 
+          sudo apt install certbot python3-certbot-nginx &&
+          sudo certbot --nginx -d bbd-grad-project.co.za -d www.bbd-grad-project.co.za --non-interactive --agree-tos --email shashin.gounden@bbd.co.za
+        '
+            
   flyway:
     needs:
       - terraform
