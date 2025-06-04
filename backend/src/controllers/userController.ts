@@ -13,12 +13,15 @@ export const createUser = async (req: Request, res: Response, next: NextFunction
 
 export const verifyEmail = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const { email, token } = req.body;
+    const emailParam = req.query.email;
+    const tokenParam = req.query.token;
 
-    if (!email || !token) {
-      res.status(400).json({ message: 'Email and token are required' });
+    if (typeof emailParam !== 'string' || typeof tokenParam !== 'string') {
+      res.status(400).json({ message: 'Email and token must be strings' });
       return;
     }
+    const email = emailParam;
+    const token = tokenParam;
 
     const result = await verifyEmailToken(email, token);
 

@@ -8,7 +8,7 @@ router.post(
   "/sign-up", validateUserCreation, createUser
 );
 
-router.post(
+router.get(
   '/verify-email', verifyEmail
 );
 
