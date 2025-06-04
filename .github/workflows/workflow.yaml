@@ -255,7 +255,8 @@ jobs:
 
   issue-certificates:
     needs:
-    - deploy-api 
+    - deploy-api
+    - terraform
     permissions:
         id-token: write
         contents: read
