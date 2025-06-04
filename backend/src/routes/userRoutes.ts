@@ -1,5 +1,5 @@
 import express from "express";
-import { createUser, verifyEmail } from "../controllers/userController";
+import { createUser, loginUser, verifyEmail } from "../controllers/userController";
 import { validateUserCreation } from "../middlewares/validateRequest";
 
 const router = express.Router();
@@ -10,6 +10,10 @@ router.post(
 
 router.post(
   '/verify-email', verifyEmail
+);
+
+router.post(
+  '/login', loginUser
 );
 
 export default router;
