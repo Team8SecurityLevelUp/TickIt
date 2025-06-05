@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - develop
       - pipeline-setup
 
 jobs:
@@ -28,6 +29,19 @@ jobs:
         with:
           role-to-assume: arn:aws:iam::363615071302:role/github-role
           aws-region: af-south-1
+
+      - name: Ensure S3 bucket exists for backend
+        run: |
+          BUCKET_NAME="tickit-bucket-state"
+          REGION="af-south-1"
+
+          if ! aws s3api head-bucket --bucket "$BUCKET_NAME" 2>/dev/null; then
+            echo "Bucket does not exist. Creating..."
+            aws s3api create-bucket --bucket "$BUCKET_NAME" --region "$REGION" \
+              --create-bucket-configuration LocationConstraint="$REGION"
+          else
+            echo "Bucket already exists."
+          fi
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -205,6 +219,11 @@ jobs:
             DB_NAME, dbname
             POSTGRES_USER, postgresuser
             POSTGRES_PASS, postgrespass
+            SMTP_HOST, smtphost
+            SMTP_PORT, smtpport
+            SMTP_USER, smtpuser
+            SMTP_PASSWORD, smtppass
+            JWT_SECRET, jwtsecret
 
       - name: Download build artifact
         uses: actions/download-artifact@v4
@@ -226,6 +245,11 @@ jobs:
           DB_NAME=${{ env.DB_NAME }}
           DB_USER=${{ env.POSTGRES_USER }}
           DB_PASSWORD=${{ env.POSTGRES_PASS }}
+          SMTP_HOST=${{ env.SMTP_HOST }}
+          SMTP_PORT=${{ env.SMTP_PORT }}
+          SMTP_USER=${{ env.SMTP_USER }}
+          SMTP_PASSWORD=${{ env.SMTP_PASSWORD }}
+          JWT_SECRET=${{ env.JWT_SECRET }}
           EOF
           '
       
@@ -252,6 +276,84 @@ jobs:
             pm2 start index.js --name tickit-api
           '
 
+  issue-certificates:
+    needs:
+    - deploy-api
+    - terraform
+    permissions:
+        id-token: write
+        contents: read
+    name: Issue Certificates
+    runs-on: ubuntu-latest
+    steps:
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        role-to-assume: arn:aws:iam::363615071302:role/github-role
+        aws-region: af-south-1
+
+    - name: Get secrets from AWS Key Store
+      uses: aws-actions/aws-secretsmanager-get-secrets@v2
+      with:
+        secret-ids: |
+          EC2_PRIVATE_KEY, privatekey
+
+    - name: Setup private key
+      run: |
+        echo "${{ env.EC2_PRIVATE_KEY }}" > privatekey.pem
+        chmod 0500 privatekey.pem
+
+    - name: Setup nginx proxy
+      run: |
+        EC2_HOST=${{ needs.terraform.outputs.ec2host }}
+
+        ssh -o StrictHostKeyChecking=no -i privatekey.pem ubuntu@$EC2_HOST 'bash -s' <<'EOF'
+        sudo tee /etc/nginx/sites-enabled/default > /dev/null <<'NGINX_CONF'
+        server {
+        listen 80;
+        server_name bbd-grad-project.co.za www.bbd-grad-project.co.za;
+
+        # Required for Certbot's HTTP-01 challenge
+        location /.well-known/acme-challenge/ {
+            root /var/www/html;
+        }
+
+        location / {
+            proxy_pass http://localhost:3000; # Front-end
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection 'upgrade';
+            proxy_set_header Host $host;
+            proxy_cache_bypass $http_upgrade;
+        }
+
+        location /api/ {
+            proxy_pass http://localhost:5000; # API
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection 'upgrade';
+            proxy_set_header Host $host;
+            proxy_cache_bypass $http_upgrade;
+        }
+        }
+        NGINX_CONF
+        EOF
+
+    - name: Verify and Reload nginx
+      run: |
+        EC2_HOST=${{ needs.terraform.outputs.ec2host }}
+        ssh -o StrictHostKeyChecking=no -i privatekey.pem "ubuntu@$EC2_HOST" ' 
+          sudo nginx -t && sudo systemctl reload nginx
+        '
+
+    - name: Cerbot
+      run: |
+        EC2_HOST=${{ needs.terraform.outputs.ec2host }}
+        ssh -o StrictHostKeyChecking=no -i privatekey.pem "ubuntu@$EC2_HOST" ' 
+          sudo apt install certbot python3-certbot-nginx -y &&
+          sudo certbot --nginx -d bbd-grad-project.co.za -d www.bbd-grad-project.co.za --non-interactive --agree-tos --email shashin.gounden@bbd.co.za
+        '
+            
   flyway:
     needs:
       - terraform
