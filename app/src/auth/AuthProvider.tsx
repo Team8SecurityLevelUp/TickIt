@@ -8,7 +8,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = React.useState(true);
 
   React.useEffect(() => {
-    fetcher('/auth')
+    fetcher('/user/auth')
       .then((data) => setUser(data?.user || null))
       .catch(() => setUser(null))
       .finally(() => setLoading(false));
