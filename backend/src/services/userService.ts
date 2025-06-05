@@ -9,6 +9,7 @@ getUnverifiedUserWithPendingToken,
 updateUnverifiedUser
 } from '../repositories/userRepository';
 import * as bcrypt from 'bcrypt';
+import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
 import { sendVerificationEmail } from '../utils/emailSender';
 
@@ -35,7 +36,7 @@ export const registerUser = async (username: string, password: string, email: st
     } else {
         newUser = await insertUser(email, username, hash);
     }
-    const token = Math.floor(100000 + Math.random() * 900000).toString();
+    const token = crypto.randomBytes(16).toString('hex');
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
     await storeVerificationToken(newUser.id, token, expiresAt);
     await sendVerificationEmail(email, token);
