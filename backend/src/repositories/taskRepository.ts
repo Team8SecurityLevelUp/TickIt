@@ -321,5 +321,82 @@ export default {
         } finally {
             client.release();
         }
+    },
+
+    async getTaskStatusHistory(
+        taskId: number
+    ): Promise<Array<{
+        taskId: number;
+        newStatus: string;
+        changedBy: string;
+        changedAt: Date;
+    }>> {
+        const result = await db.query(
+            `SELECT
+                tsh.task_id as "taskId",
+                ts.status as "newStatus",
+                u.username as "changedBy",
+                tsh.changed_at as "changedAt"
+            FROM task_status_history tsh
+            JOIN task_statuses ts ON tsh.new_status = ts.id
+            JOIN users u ON tsh.changed_by = u.id
+            WHERE tsh.task_id = $1
+            ORDER BY tsh.changed_at DESC`,
+            [taskId]
+        );
+        return result.rows;
+    },
+
+    async getAllTasks(): Promise<Task[]> {
+        const result = await db.query(
+            `SELECT
+                t.id as "taskId",
+                t.title,
+                t.description,
+                t.created_at as "createdAt",
+                t.due_date as "dueDate",
+                t.completed_at as "completedAt",
+                tm.team_name as "teamName",
+                ts.status as "status",
+                creator.username as "createdByUsername",
+                assignee.username as "assignedToUsername"
+            FROM tasks t
+            JOIN teams tm ON t.team_id = tm.id
+            JOIN task_statuses ts ON t.status_id = ts.id
+            JOIN users creator ON t.created_by_user_id = creator.id
+            LEFT JOIN users assignee ON t.assigned_user_id = assignee.id
+            WHERE t.status_id != 4
+            ORDER BY t.created_at DESC`
+        );
+        return result.rows;
+    },
+
+    async getTaskById(taskId: number): Promise<Task> {
+        const result = await db.query(
+            `SELECT
+                t.id as "taskId",
+                t.title,
+                t.description,
+                t.created_at as "createdAt",
+                t.due_date as "dueDate",
+                t.completed_at as "completedAt",
+                tm.team_name as "teamName",
+                ts.status as "status",
+                creator.username as "createdByUsername",
+                assignee.username as "assignedToUsername"
+            FROM tasks t
+            JOIN teams tm ON t.team_id = tm.id
+            JOIN task_statuses ts ON t.status_id = ts.id
+            JOIN users creator ON t.created_by_user_id = creator.id
+            LEFT JOIN users assignee ON t.assigned_user_id = assignee.id
+            WHERE t.id = $1 AND t.status_id != 4`,
+            [taskId]
+        );
+
+        if (result.rows.length === 0) {
+            throw new Error('Task not found');
+        }
+
+        return result.rows[0];
     }
 };
