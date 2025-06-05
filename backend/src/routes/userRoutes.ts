@@ -1,22 +1,19 @@
 import express from "express";
-import { validateRequest } from '../middlewares/validateRequest';
-import { userCreationSchema, loginSchema } from '../schemas/userSchemas';
 import { createUser, loginUser, verifyEmail, getAuthenticatedUser } from "../controllers/userController";
+import { validateUserCreation } from "../middlewares/validateRequest";
 
 const router = express.Router();
 
 router.post(
-  "/sign-up",
-  validateRequest(userCreationSchema),
-  createUser
+  "/sign-up", validateUserCreation, createUser
 );
 
-router.get('/verify-email', verifyEmail);
+router.get(
+  '/verify-email', verifyEmail
+);
 
 router.post(
-  '/login',
-  validateRequest(loginSchema),
-  loginUser
+  '/login', loginUser
 );
 
 router.get('/auth', getAuthenticatedUser);

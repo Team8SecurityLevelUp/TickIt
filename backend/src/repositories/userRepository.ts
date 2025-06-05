@@ -57,7 +57,7 @@ export const getUnverifiedUserWithPendingToken = async (email: string) => {
         FROM user_verification v
         WHERE v.user_id = u.id
           AND v.is_used = false
-          AND v.expiration_date > NOW()
+          AND v.expiration_date < NOW()
       )
     `,
     [email]
