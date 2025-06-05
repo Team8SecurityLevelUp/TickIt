@@ -5,6 +5,7 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import userRoutes from './routes/userRoutes';
 import taskRoutes from './routes/taskRoutes';
+import teamRoutes from './routes/teamRoutes';
 import './config/database'; 
 
 const app = express();
@@ -26,6 +27,7 @@ app.use(express.json());
 app.use(cookieParser());
 app.use('/api/user', userRoutes);
 app.use('/api/tasks', taskRoutes);
+app.use('/api/teams', teamRoutes);
 
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
     console.error(err.stack);

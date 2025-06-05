@@ -40,6 +40,8 @@ export const registerUser = async (username: string, password: string, email: st
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
     await storeVerificationToken(newUser.id, token, expiresAt);
     await sendVerificationEmail(email, token);
+    console.log('Existing user:', user);
+    console.log('Returning newUser:', newUser);
     return {
         email: newUser.email,
         username: newUser.username,
