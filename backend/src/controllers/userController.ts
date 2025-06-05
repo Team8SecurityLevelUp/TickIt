@@ -73,6 +73,7 @@ export const getAuthenticatedUser = async (req: Request, res: Response, next: Ne
 
   if (!token) {
     res.status(401).json({ user: null });
+      return;
   }
 
   try {
@@ -83,6 +84,7 @@ export const getAuthenticatedUser = async (req: Request, res: Response, next: Ne
     const user = await getVerifiedUserByEmail(decoded.email);
     if (!user) {
       res.status(401).json({ user: null });
+        return;
     }
 
     res.status(200).json({
