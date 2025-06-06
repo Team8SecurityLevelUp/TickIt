@@ -13,7 +13,7 @@ import { authenticateJwt } from '../middlewares/auth';
 
 const router = express.Router();
 
-router.use(authenticateJwt);
+//router.use(authenticateJwt); // Uncomment this line to enable JWT authentication for all routes
 
 router.get("/", getTeams);
 

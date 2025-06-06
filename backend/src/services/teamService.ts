@@ -45,7 +45,7 @@ export const joinExistingTeam = async (
   if (!team) throw new BadRequestError('Team not found');
   if (!team.is_active) throw new BadRequestError('Team is not active');
 
-  const existingRoles = await getUserTeamRoles(teamId, userId);
+  const existingRoles = await getUserTeamRoles(userId, teamId);
   if (existingRoles.length > 0) {
     throw new BadRequestError('User already has roles in this team');
   }
