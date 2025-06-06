@@ -199,3 +199,64 @@ export const deleteTask = async (req: Request, res: Response, next: NextFunction
         next(error);
     }
 };
+
+export const getTaskStatusHistory = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        const taskId = parseInt(req.params.taskId);
+
+        if (isNaN(taskId)) {
+            res.status(400).json({
+                error: 'Invalid task ID'
+            });
+            return;
+        }
+
+        const history = await taskRepository.getTaskStatusHistory(taskId);
+        
+        if (history.length === 0) {
+            res.status(404).json({
+                error: 'No history found for this task'
+            });
+            return;
+        }
+
+        res.status(200).json(history);
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const getAllTasks = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        const tasks = await taskRepository.getAllTasks();
+        res.status(200).json(tasks);
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const getTaskById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        const taskId = parseInt(req.params.taskId);
+
+        if (isNaN(taskId)) {
+            res.status(400).json({
+                error: 'Invalid task ID'
+            });
+            return;
+        }
+
+        try {
+            const task = await taskRepository.getTaskById(taskId);
+            res.status(200).json(task);
+        } catch (error) {
+            if (error instanceof Error && error.message === 'Task not found') {
+                res.status(404).json({ error: 'Task not found' });
+                return;
+            }
+            throw error;
+        }
+    } catch (error) {
+        next(error);
+    }
+};
