@@ -6,6 +6,10 @@ import EditTaskModal from './EditTaskModal';
 import TaskHistoryCard from './TaskHistoryCard';
 import type { TaskHistory } from './TaskHistoryCard';
 import TaskStatusChart from './TaskStatusChart';
+import { useNavigate } from 'react-router-dom';
+import { useContext } from 'react';
+import { ModalContext } from './ModalContext';
+import { UpdateUserRoleModal } from './UpdateUserRoleModal';
 
 
 
@@ -171,6 +175,8 @@ export default function KanbanBoard() {
   const [tasks, setTasks] = useState<Task[]>(initialTasks);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [formData, setFormData] = useState<Partial<Task>>({});
+  const { show, hide } = useContext(ModalContext)!;
+  const navigate = useNavigate();
 
   const onDragStart = (e: React.DragEvent, taskId: number) => {
     e.dataTransfer.setData('text/plain', taskId.toString());
@@ -222,8 +228,15 @@ export default function KanbanBoard() {
     setFormData({});
   };
 
+
   return (
     <div className="kanban-container">
+      <header className="kanban-header">
+        <h1 onClick={() => navigate('/')}>TickIt</h1>
+        <button onClick={() => show(<UpdateUserRoleModal onClose={hide} />)}>
+          Access Manager
+        </button>
+      </header>
       <div className="kanban-board">
         <KanbanColumn
           statusId={1}

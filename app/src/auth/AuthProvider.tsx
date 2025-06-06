@@ -1,7 +1,7 @@
+import React from 'react';
 import { fetcher } from '../utils/fetcher';
 import type { User } from '../types/User';
 import { AuthContext } from './AuthContext';
-import React from 'react';
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = React.useState<User | null>(null);
@@ -14,8 +14,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       .finally(() => setLoading(false));
   }, []);
 
+  const logout = async () => {
+    try {
+      await fetcher('/user/logout', { method: 'POST' });
+    } catch (err) {
+      console.error('Logout failed', err);
+    } finally {
+      setUser(null); 
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading }}>
+    <AuthContext.Provider value={{ user, loading, setUser, logout }}>
       {children}
     </AuthContext.Provider>
   );
