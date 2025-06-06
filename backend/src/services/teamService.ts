@@ -32,6 +32,8 @@ export const createNewTeam = async (teamName: string, userId: number) => {
     insertTeamRole(team.id, userId, todoUser.id, accepted.id)
   ]);
 
+  await insertTeamMember(team.id, userId);
+
   return team;
 };
 
@@ -80,7 +82,7 @@ export const updateTeamStatus = async (teamId: number, userId: number, isActive:
   const team = await getTeamById(teamId);
   if (!team) throw new BadRequestError('Team not found');
 
-  const roles = await getUserTeamRoles(teamId, userId);
+  const roles = await getUserTeamRoles(userId, teamId);
   const isAdmin = roles.some(role => role.role_name === 'AccessAdmin');
   if (!isAdmin) throw new ForbiddenError('Only Access Admins can modify team status');
 
@@ -92,7 +94,7 @@ export const updateTeamDetails = async (teamId: number, userId: number, teamName
   const team = await getTeamById(teamId);
   if (!team) throw new BadRequestError('Team not found');
 
-  const roles = await getUserTeamRoles(teamId, userId);
+  const roles = await getUserTeamRoles(userId, teamId);
   const allowed = roles.some(role => ['AccessAdmin', 'TeamLead'].includes(role.role_name));
   if (!allowed) throw new ForbiddenError('Only Access Admins and Team Leads can modify team details');
 
