@@ -102,7 +102,7 @@ export const updateTeamDetails = async (teamId: number, userId: number, teamName
 // Accept a user's join request to a team
 export const acceptJoinRequest = async (teamId: number, userId: number, actingUserId: number) => {
   // Check if acting user is AccessAdmin for this team
-  const adminRoles = await getUserTeamRoles(teamId, actingUserId);
+  const adminRoles = await getUserTeamRoles(actingUserId, teamId);
   const isAdmin = adminRoles.some(role => role.role_name === 'AccessAdmin');
   if (!isAdmin) throw new ForbiddenError('Only Access Admins can approve join requests');
 
@@ -124,7 +124,7 @@ export const acceptJoinRequest = async (teamId: number, userId: number, actingUs
 // Reject a user's join request to a team
 export const rejectJoinRequest = async (teamId: number, userId: number, actingUserId: number) => {
   // Check if acting user is AccessAdmin for this team
-  const adminRoles = await getUserTeamRoles(teamId, actingUserId);
+  const adminRoles = await getUserTeamRoles(actingUserId, teamId);
   const isAdmin = adminRoles.some(role => role.role_name === 'AccessAdmin');
   if (!isAdmin) throw new ForbiddenError('Only Access Admins can reject join requests');
 
