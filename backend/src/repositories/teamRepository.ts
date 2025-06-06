@@ -100,7 +100,7 @@ export const updateTeam = async (
 
     if (updates.is_active !== undefined) {
       setClauses.push(`is_active = $${paramCount}`);
-      values.push(updates.is_active);
+      values.push(updates.is_active ? '1' : '0');
       paramCount++;
     }
 
