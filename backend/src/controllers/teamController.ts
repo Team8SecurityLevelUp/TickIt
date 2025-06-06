@@ -41,7 +41,7 @@ export const getTeams = async (req: Request, res: Response, next: NextFunction) 
 // create a new team
 export const createTeam = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    // req.user = { id: 2 }; // For local testing
+    // req.user = { id: 4 }; // For local testing
     if (!req.user) throw new UnauthorizedError();
 
     const { teamName } = req.body;
@@ -59,7 +59,7 @@ export const createTeam = async (req: Request, res: Response, next: NextFunction
 // join an existing team
 export const joinTeam = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    // req.user = { id: 2 }; // For local testing
+    // req.user = { id: 1 }; // For local testing
     if (!req.user) throw new UnauthorizedError();
 
     const { teamId, roleType } = req.body;
@@ -78,7 +78,7 @@ export const joinTeam = async (req: Request, res: Response, next: NextFunction) 
 // respond to join request (accept or reject)
 export const respondJoinRequest = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    // req.user = { id: 3 }; // For local testing
+    // req.user = { id: 2 }; // For local testing
     if (!req.user) throw new UnauthorizedError();
 
     const { teamId, userId, action } = req.body;
@@ -98,7 +98,7 @@ export const respondJoinRequest = async (req: Request, res: Response, next: Next
 // update team details
 export const updateTeam = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    // req.user = { id: 2 }; // For local testing
+    // req.user = { id: 1 }; // For local testing
     if (!req.user) throw new UnauthorizedError();
 
     const teamId = parseInt(req.params.teamId);
