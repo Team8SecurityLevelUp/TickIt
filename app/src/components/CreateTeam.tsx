@@ -1,34 +1,41 @@
-import { useState } from "react";
-import { fetcher } from "../utils/fetcher";
-import "./CreateTeam.css";
+import { useState } from 'react';
+import './CreateTeam.css';
 
-export const CreateTeam = ({ onClose }: { onClose: () => void }) => {
-  const [teamName, setTeamName] = useState("");
+interface Props {
+  onCreate: (teamName: string) => void;
+}
 
-  const handleCreate = async () => {
-    try {
-      await fetcher("/team/create", {
-        method: "POST",
-        body: { name: teamName },
-      });
-      onClose();
-    } catch (err) {
-      console.error("Failed to create team", err);
+export const CreateTeam = ({ onCreate }: Props) => {
+  const [teamName, setTeamName] = useState('');
+  const [error, setError] = useState('');
+
+  const handleCreate = () => {
+    if (!teamName.trim()) {
+      setError('Team name is required.');
+      return;
     }
+
+    onCreate(teamName);
   };
 
   return (
-    <div className="modal">
-      <h2>Create a New Team</h2>
+    <form className="team-create-form" onSubmit={(e) => { e.preventDefault(); handleCreate(); }}>
+      <h2 className="team-create-title">Create a New Team</h2>
+
       <label htmlFor="team-name">Team Name</label>
       <input
         id="team-name"
         type="text"
         value={teamName}
-        onChange={(e) => setTeamName(e.target.value)}
+        onChange={(e) => {
+          setTeamName(e.target.value);
+          setError('');
+        }}
       />
-      <button onClick={handleCreate}>Create Team</button>
-      <button onClick={onClose}>Close</button>
-    </div>
+
+      {error && <p className="team-create-error">{error}</p>}
+
+      <button type="submit">Create Team</button>
+    </form>
   );
 };

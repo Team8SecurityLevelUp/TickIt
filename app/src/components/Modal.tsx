@@ -8,7 +8,7 @@ interface ModalProps {
 }
 
 export const Modal = ({ isOpen, onClose, children }: ModalProps) => {
-  const modalRef = useRef<HTMLDivElement>(null);  // Ref for the modal content
+  const modalRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -19,7 +19,6 @@ export const Modal = ({ isOpen, onClose, children }: ModalProps) => {
     return () => document.removeEventListener('keydown', handleEscape);
   }, [onClose]);
 
-  // Close the modal if clicked outside the modal content
   const handleBackdropClick = (e: React.MouseEvent) => {
     if (modalRef.current && !modalRef.current.contains(e.target as Node)) {
       onClose();
@@ -29,13 +28,23 @@ export const Modal = ({ isOpen, onClose, children }: ModalProps) => {
   if (!isOpen) return null;
 
   return (
-    <div className="modal-backdrop" onClick={handleBackdropClick}>
-      <div className="modal-content" ref={modalRef} onClick={(e) => e.stopPropagation()}>
+    <dialog
+      open
+      className="modal-backdrop"
+      onClick={handleBackdropClick}
+      aria-modal="true"
+      role="dialog"
+    >
+      <section
+        className="modal-content"
+        ref={modalRef}
+        onClick={(e) => e.stopPropagation()}
+      >
         <button className="modal-close" onClick={onClose} aria-label="Close modal">
           &times;
         </button>
         {children}
-      </div>
-    </div>
+      </section>
+    </dialog>
   );
 };

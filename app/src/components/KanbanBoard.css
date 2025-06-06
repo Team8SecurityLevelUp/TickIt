@@ -62,3 +62,19 @@
     flex-direction: column;
   }
 }
+
+.kanban-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid black;
+  padding: 1rem;
+}
+
+.kanban-header button {
+  padding: 0.5rem 1rem;
+  border: 2px solid black;
+  background: none;
+  cursor: pointer;
+  font-weight: bold;
+}

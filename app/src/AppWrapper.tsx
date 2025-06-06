@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import { App } from './App';
+import { HomePage } from './pages/HomePage';
 import { PrivateRoute } from './auth/PrivateRoute';
 import { AuthProvider } from './auth/AuthProvider';
 import { Login } from './pages/Login';
@@ -14,10 +14,10 @@ export const AppWrapper = () => (
     <ModalProvider>
       <Router>
         <Routes>
-          <Route path="/" element={<PrivateRoute><App /></PrivateRoute>} />
+          <Route path="/" element={<PrivateRoute><HomePage /></PrivateRoute>} />
           <Route path="/login" element={<PublicOnlyRoute><Login /></PublicOnlyRoute>} />
           <Route path="/signup" element={<PublicOnlyRoute><Signup /></PublicOnlyRoute>} />
-          <Route path='/team-board' element={<PublicOnlyRoute><TeamBoard /></PublicOnlyRoute>} />
+          <Route path='/team-board' element={<PrivateRoute><TeamBoard /></PrivateRoute>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Router>

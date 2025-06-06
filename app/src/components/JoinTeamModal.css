@@ -1,0 +1,50 @@
+.join-modal {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 2rem;
+  border: 2px solid black;
+  background: white;
+  max-width: 500px;
+  width: 100%;
+  box-sizing: border-box;
+  font-family: sans-serif;
+}
+
+.join-modal-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  text-align: center;
+}
+
+.join-modal-text {
+  font-size: 1rem;
+  text-align: center;
+}
+
+.join-modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.join-button,
+.cancel-button {
+  padding: 0.75rem 1.5rem;
+  border: 2px solid black;
+  background: none;
+  font-weight: bold;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.join-button:hover {
+  background: black;
+  color: white;
+}
+
+.cancel-button:hover {
+  background: #f2f2f2;
+}
