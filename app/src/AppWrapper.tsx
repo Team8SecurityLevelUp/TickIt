@@ -6,16 +6,19 @@ import { Login } from './pages/Login';
 import { Signup } from './pages/SignUp';
 import { NotFound } from './pages/NotFound';
 import { PublicOnlyRoute } from './PublicOnlyRoutes';
+import { ModalProvider } from './components/ModalProvider';
 
 export const AppWrapper = () => (
-    <AuthProvider>
-        <Router>
-            <Routes>
-                <Route path='/' element={<PrivateRoute><App /></PrivateRoute>} />
-                <Route path='/login' element={<PublicOnlyRoute><Login /></PublicOnlyRoute>} />
-                <Route path='/signup' element={<PublicOnlyRoute><Signup /></PublicOnlyRoute>} />
-                <Route path='*' element={<NotFound/>} />
-            </Routes>
-        </Router>
-    </AuthProvider>
+  <AuthProvider>
+    <ModalProvider>
+      <Router>
+        <Routes>
+          <Route path="/" element={<PrivateRoute><App /></PrivateRoute>} />
+          <Route path="/login" element={<PublicOnlyRoute><Login /></PublicOnlyRoute>} />
+          <Route path="/signup" element={<PublicOnlyRoute><Signup /></PublicOnlyRoute>} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </Router>
+    </ModalProvider>
+  </AuthProvider>
 );
