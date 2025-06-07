@@ -48,6 +48,26 @@ export const getTeamById = async (teamId: number) => {
   }
 };
 
+export const fetchTeamParticipants = async (teamId: number) => {
+  const query = `
+    SELECT 
+      u.id AS user_id,
+      u.username,
+      r.role_name,
+      a.status AS approval_status
+    FROM team_roles tr
+    JOIN users u ON u.id = tr.user_id
+    JOIN roles r ON r.id = tr.role_id
+    JOIN approval_statuses a ON a.id = tr.approved_status_id
+    WHERE tr.team_id = $1
+    ORDER BY u.username ASC
+  `;
+  const result = await db.query(query, [teamId]);
+  return result.rows;
+};
+
+
+
 
 export const getUserTeamRoles = async (userId: number, teamId?: number) => {
   try {
@@ -80,6 +100,72 @@ export const getUserTeamRoles = async (userId: number, teamId?: number) => {
     return result.rows;
   } catch (error) {
     throw new DatabaseError(`Failed to get user team roles: ${(error as Error).message}`);
+  }
+};
+
+export const getTeamsWithUserRoles = async (userId: number, teamId?: number) => {
+  try {
+    let query = `
+      SELECT 
+        t.id AS team_id,
+        t.team_name,
+        t.is_active,
+        r.role_name,
+        ast.status AS approval_status,
+        u.username AS creator_username,
+        (
+          SELECT COUNT(*) 
+          FROM team_members tm 
+          WHERE tm.team_id = t.id
+        )::int AS member_count
+      FROM teams t
+      LEFT JOIN team_roles tr ON tr.team_id = t.id AND tr.user_id = $1
+      LEFT JOIN roles r ON r.id = tr.role_id
+      LEFT JOIN approval_statuses ast ON ast.id = tr.approved_status_id
+      JOIN team_roles creator_tr ON creator_tr.team_id = t.id
+      JOIN roles creator_r ON creator_r.id = creator_tr.role_id AND creator_r.role_name = 'Creator'
+      JOIN users u ON u.id = creator_tr.user_id
+    `;
+
+    const values: (number | undefined)[] = [userId];
+
+    if (teamId !== undefined) {
+      query += ` WHERE t.id = $2`;
+      values.push(teamId);
+    }
+
+    query += ` ORDER BY t.date_created DESC`;
+
+    const result = await db.query(query, values);
+
+    const teamMap: Record<number, any> = {};
+
+    for (const row of result.rows) {
+      const teamId = row.team_id;
+      if (!teamMap[teamId]) {
+        teamMap[teamId] = {
+          team_id: row.team_id,
+          team_name: row.team_name,
+          is_active: row.is_active,
+          member_count: row.member_count,
+          roles: [],
+          creator: {
+            username: row.creator_username
+          }
+        };
+      }
+
+      if (row.role_name) {
+        teamMap[teamId].roles.push({
+          role_name: row.role_name,
+          approval_status: row.approval_status
+        });
+      }
+    }
+
+    return Object.values(teamMap);
+  } catch (error) {
+    throw new DatabaseError(`Failed to get user team roles`);
   }
 };
 
