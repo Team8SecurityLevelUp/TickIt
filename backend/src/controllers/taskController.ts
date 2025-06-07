@@ -7,31 +7,43 @@ export const createTask = async (req: Request, res: Response, next: NextFunction
             teamId,
             title,
             description,
-            statusId,
             createdByUserId,
             dueDate
         } = req.body;
 
-        if (!teamId || !title || !statusId || !createdByUserId || !dueDate) {
+        if (!teamId || !title || !createdByUserId || !dueDate) {
             res.status(400).json({
-                error: 'Required fields missing: teamId, title, statusId, createdByUserId, and dueDate are required'
+                error: 'Required fields missing: teamId, title, createdByUserId, and dueDate are required'
             });
             return;
         }
 
-        const task = await taskRepository.insertTask(
-            teamId,
-            title,
-            description || '',
-            statusId,
-            createdByUserId,
-            null,
-            new Date(),
-            new Date(dueDate),
-            null
-        );
-
-        res.status(201).json(task);
+        try {
+            const task = await taskRepository.insertTask(
+                teamId,
+                title,
+                description || '',
+                1,
+                createdByUserId,
+                null,
+                new Date(),
+                new Date(dueDate),
+                null
+            );
+            res.status(201).json(task);
+        } catch (error) {
+            if (error instanceof Error) {
+                if (error.message === 'Team not found') {
+                    res.status(404).json({ error: 'Team not found' });
+                    return;
+                }
+                if (error.message === 'Cannot create task: Team is not active') {
+                    res.status(400).json({ error: error.message });
+                    return;
+                }
+            }
+            throw error;
+        }
     } catch (error) {
         next(error);
     }
