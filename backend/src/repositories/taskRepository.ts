@@ -181,7 +181,8 @@ export default {
     async updateTaskDetails(
         taskId: number,
         title: string,
-        description: string
+        description: string,
+        dueDate: Date | null
     ): Promise<Task> {
         const client = await db.connect();
         try {
@@ -189,10 +190,10 @@ export default {
 
             const updateResult = await client.query(
                 `UPDATE tasks 
-                 SET title = $1, description = $2
-                 WHERE id = $3
+                 SET title = $1, description = $2, due_date = $3
+                 WHERE id = $4
                  RETURNING *`,
-                [title, description, taskId]
+                [title, description, dueDate,taskId]
             );
 
             if (updateResult.rows.length === 0) {
@@ -425,5 +426,30 @@ export default {
         }
 
         return result.rows[0];
-    }
+    },
+
+    async getTasksByTeam(teamId: number): Promise<Task[]> {
+        const result = await db.query(
+            `
+            SELECT
+            t.id as "taskId",
+            t.team_id as "teamId",
+            t.title,
+            t.description,
+            t.status_id as "statusId",
+            t.created_by_user_id as "createdBy",
+            t.assigned_user_id as "assignedTo",
+            t.created_at as "createdAt",
+            t.due_date as "dueDate",
+            t.completed_at as "completedAt"
+            FROM tasks t
+            WHERE t.team_id = $1 AND t.status_id != 4
+            ORDER BY t.created_at DESC
+            `,
+            [teamId]
+        );
+
+        return result.rows;
+        }
 };
+

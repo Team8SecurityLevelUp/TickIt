@@ -1,13 +1,15 @@
 import type { Request, Response, NextFunction } from 'express';
 import taskRepository from '../repositories/taskRepository';
+import { UnauthorizedError } from '../utils/errors';
 
 export const createTask = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
+        if (!req.user) throw new UnauthorizedError();
+        const createdByUserId = req.user.id;
         const {
             teamId,
             title,
             description,
-            createdByUserId,
             dueDate
         } = req.body;
 
@@ -51,8 +53,10 @@ export const createTask = async (req: Request, res: Response, next: NextFunction
 
 export const updateTaskStatus = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
+        if (!req.user) throw new UnauthorizedError();
+        const userId = req.user.id;
         const taskId = parseInt(req.params.taskId);
-        const { statusId, userId } = req.body; //Will remove userId later when we implement auth
+        const { statusId } = req.body;
 
         if (!statusId || !userId) {
             res.status(400).json({
@@ -103,7 +107,7 @@ export const assignTask = async (req: Request, res: Response, next: NextFunction
 export const updateTaskDetails = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         const taskId = parseInt(req.params.taskId);
-        const { title, description } = req.body;
+        const { title, description, dueDate } = req.body;
 
         if (isNaN(taskId)) {
             res.status(400).json({
@@ -122,7 +126,8 @@ export const updateTaskDetails = async (req: Request, res: Response, next: NextF
         const task = await taskRepository.updateTaskDetails(
             taskId,
             title,
-            description || ''
+            description || '',
+            dueDate ? new Date(dueDate) : null
         );
 
         res.status(200).json(task);
@@ -271,4 +276,19 @@ export const getTaskById = async (req: Request, res: Response, next: NextFunctio
     } catch (error) {
         next(error);
     }
+};
+
+export const getAllTeamTasks = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const teamId = Number(req.params.teamId);
+    if (!teamId) {
+      res.status(400).json({ error: 'Invalid or missing teamId' });
+      return;
+    }
+
+    const tasks = await taskRepository.getTasksByTeam(teamId);
+    res.status(200).json(tasks);
+  } catch (error) {
+    next(error);
+  }
 };
