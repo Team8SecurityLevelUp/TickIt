@@ -13,33 +13,60 @@ export default {
         dueDate: Date,
         completedAt: Date | null
     ): Promise<Task> {
-        const result = await db.query(
-            `
-            WITH tasks AS (
-                INSERT INTO tasks (team_id, title, description, status_id, created_by_user_id, assigned_user_id, created_at, due_date, completed_at)
-                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-                RETURNING *
-            )
-            SELECT
-                tasks.id as "taskId",
-                tasks.title,
-                tasks.description,
-                tasks.created_at as "createdAt",
-                tasks.due_date as "dueDate",
-                tasks.completed_at as "completedAt",
-                teams.team_name as "teamName",
-                task_statuses.status as "status",
-                creator.username as "createdByUsername",
-                assignee.username as "assignedToUsername"
-            FROM tasks
-            JOIN teams ON tasks.team_id = teams.id
-            JOIN task_statuses ON tasks.status_id = task_statuses.id
-            JOIN users creator ON tasks.created_by_user_id = creator.id
-            LEFT JOIN users assignee ON tasks.assigned_user_id = assignee.id
-            `,
-            [teamId, title, description, statusId, createdBy, assignedTo, createdAt, dueDate, completedAt]
-        );
-        return result.rows[0];
+        const client = await db.connect();
+        try {
+            await client.query('BEGIN');
+
+            const teamCheck = await client.query(
+                `SELECT is_active 
+                 FROM teams 
+                 WHERE id = $1`,
+                [teamId]
+            );
+
+            if (teamCheck.rows.length === 0) {
+                throw new Error('Team not found');
+            }
+
+            if (!teamCheck.rows[0].is_active) {
+                throw new Error('Cannot create task: Team is not active');
+            }
+
+            const result = await client.query(
+                `
+                WITH tasks AS (
+                    INSERT INTO tasks (team_id, title, description, status_id, created_by_user_id, assigned_user_id, created_at, due_date, completed_at)
+                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+                    RETURNING *
+                )
+                SELECT
+                    tasks.id as "taskId",
+                    tasks.title,
+                    tasks.description,
+                    tasks.created_at as "createdAt",
+                    tasks.due_date as "dueDate",
+                    tasks.completed_at as "completedAt",
+                    teams.team_name as "teamName",
+                    task_statuses.status as "status",
+                    creator.username as "createdByUsername",
+                    assignee.username as "assignedToUsername"
+                FROM tasks
+                JOIN teams ON tasks.team_id = teams.id
+                JOIN task_statuses ON tasks.status_id = task_statuses.id
+                JOIN users creator ON tasks.created_by_user_id = creator.id
+                LEFT JOIN users assignee ON tasks.assigned_user_id = assignee.id
+                `,
+                [teamId, title, description, statusId, createdBy, assignedTo, createdAt, dueDate, completedAt]
+            );
+
+            await client.query('COMMIT');
+            return result.rows[0];
+        } catch (error) {
+            await client.query('ROLLBACK');
+            throw error;
+        } finally {
+            client.release();
+        }
     },
 
     async updateTaskStatus(
