@@ -122,3 +122,9 @@ main {
   font-weight: bold;
   cursor: pointer;
 }
+
+.team-card.disabled {
+  opacity: 0.6;
+  cursor: default;
+  pointer-events: none;
+}

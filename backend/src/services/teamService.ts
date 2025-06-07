@@ -5,7 +5,9 @@ import {
   getTeamById,
   getUserTeamRoles,
   updateTeamRoleApprovalStatus,
-  updateTeam as updateTeamRepo
+  updateTeam as updateTeamRepo,
+  getTeamsWithUserRoles,
+  fetchTeamParticipants
 } from '../repositories/teamRepository';
 import { getRoleByName } from '../repositories/roleRepository';
 import { getApprovalStatusByName } from '../repositories/approvalRepository';
@@ -32,19 +34,24 @@ function hasEffectiveRole(userRoles: string[], requiredRole: string): boolean {
 export const createNewTeam = async (teamName: string, userId: number) => {
   const team = await insertTeam(teamName);
 
-  const [accessAdmin, teamLead, todoUser, accepted] = await Promise.all([
+  const [creator, accessAdmin, teamLead, todoUser, accepted] = await Promise.all([
+    getRoleByName('Creator'),
     getRoleByName('AccessAdmin'),
     getRoleByName('TeamLead'),
     getRoleByName('ToDoUser'),
     getApprovalStatusByName('Accepted')
   ]);
 
-  if (!accessAdmin || !teamLead || !todoUser || !accepted) {
+  if (!creator || !accessAdmin || !teamLead || !todoUser || !accepted) {
     throw new Error('Required roles or approval status not found');
   }
 
-  // Only insert AccessAdmin role for creator
-  await insertTeamRole(team.id, userId, accessAdmin.id, accepted.id);
+  await Promise.all([
+    insertTeamRole(team.id, userId, creator.id, accepted.id),
+    insertTeamRole(team.id, userId, accessAdmin.id, accepted.id),
+    insertTeamRole(team.id, userId, teamLead.id, accepted.id),
+    insertTeamRole(team.id, userId, todoUser.id, accepted.id)
+  ]);
 
   await insertTeamMember(team.id, userId);
 
@@ -84,7 +91,7 @@ export const joinExistingTeam = async (
 
 // Retrieve all teams (and roles) for a user
 export const getUserTeams = async (userId: number) => {
-  return await getUserTeamRoles(userId);
+  return await getTeamsWithUserRoles(userId);
 };
 
 // Update team active status (only AccessAdmins allowed)
@@ -164,3 +171,35 @@ export const rejectJoinRequest = async (teamId: number, userId: number, actingUs
 
   return { message: 'Join request rejected' };
 };
+
+export const fetchTeamParticipantsService = async (teamId: number) => {
+  const raw = await fetchTeamParticipants(teamId);
+
+  const memberMap: Record<number, { user_id: number; username: string; roles: string[] }> = {};
+  const joinRequests: { user_id: number; username: string }[] = [];
+
+  for (const row of raw) {
+    if (row.approval_status === 'Accepted') {
+      if (!memberMap[row.user_id]) {
+        memberMap[row.user_id] = {
+          user_id: row.user_id,
+          username: row.username,
+          roles: []
+        };
+      }
+      memberMap[row.user_id].roles.push(row.role_name);
+    } else if (row.approval_status === 'Pending') {
+      if (!joinRequests.some(jr => jr.user_id === row.user_id)) {
+        joinRequests.push({
+          user_id: row.user_id,
+          username: row.username
+        });
+      }
+    }
+  }
+
+  const members = Object.values(memberMap);
+  return { members, joinRequests };
+};
+
+

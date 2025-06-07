@@ -6,13 +6,18 @@ import EditTaskModal from './EditTaskModal';
 import TaskHistoryCard from './TaskHistoryCard';
 import type { TaskHistory } from './TaskHistoryCard';
 import TaskStatusChart from './TaskStatusChart';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useContext } from 'react';
 import { ModalContext } from './ModalContext';
 import { UpdateUserRoleModal } from './UpdateUserRoleModal';
+import { fetcher } from '../utils/fetcher';
 
 
-
+interface Member {
+  user_id: number;
+  username: string;
+  roles: string[];
+}
 
 //Mock data for now before we integrate
 const initialTasks: Task[] = [
@@ -175,8 +180,12 @@ export default function KanbanBoard() {
   const [tasks, setTasks] = useState<Task[]>(initialTasks);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [formData, setFormData] = useState<Partial<Task>>({});
+  const [isAccessAdmin, setIsAccessAdmin] = useState(false);
   const { show, hide } = useContext(ModalContext)!;
   const navigate = useNavigate();
+  const { teamId } = useParams<{ teamId: string }>();
+  const parsedTeamId = Number(teamId);
+
 
   const onDragStart = (e: React.DragEvent, taskId: number) => {
     e.dataTransfer.setData('text/plain', taskId.toString());
@@ -199,6 +208,21 @@ export default function KanbanBoard() {
   const deleteTask = (taskId: number) => {
     setTasks(prev => prev.filter(task => task.taskId !== taskId));
   };
+
+  React.useEffect(() => {
+    if (!parsedTeamId) return;
+
+    fetcher(`/teams/team-members?teamId=${parsedTeamId}`)
+      .then((res) => {
+        const currentUserId = res.data.currentUserId;
+        const currentUser = res.data.members.find((m: Member) => m.user_id === currentUserId);
+        setIsAccessAdmin(currentUser?.roles.includes('AccessAdmin') || false);
+      })
+      .catch((err) => {
+        console.error('Failed to check access admin role', err);
+      });
+  }, [parsedTeamId]);
+
 
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -233,9 +257,11 @@ export default function KanbanBoard() {
     <div className="kanban-container">
       <header className="kanban-header">
         <h1 onClick={() => navigate('/')}>TickIt</h1>
-        <button onClick={() => show(<UpdateUserRoleModal onClose={hide} />)}>
-          Access Manager
-        </button>
+        {isAccessAdmin && parsedTeamId && (
+          <button onClick={() => show(<UpdateUserRoleModal onClose={hide} teamId={parsedTeamId} />)}>
+            Access Manager
+          </button>
+        )}
       </header>
       <div className="kanban-board">
         <KanbanColumn
