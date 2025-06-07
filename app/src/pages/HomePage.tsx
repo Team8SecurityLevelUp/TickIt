@@ -75,7 +75,9 @@ export const HomePage = () => {
               });
 
               hide();
-              navigate(`/team-board/${team.team_id}`);
+              fetcher('/teams')
+              .then((res) => setTeams(res.data))
+              .catch((err) => console.error('Failed to load teams', err));
             } catch (err: unknown) {
               console.error('Failed to join team:', err);
             }
