@@ -5,7 +5,7 @@ export const insertTeam = async (teamName: string) => {
   try {
     const result = await db.query(
       `INSERT INTO teams (team_name, is_active)
-       VALUES ($1, B'1')
+       VALUES ($1, true)
        RETURNING id, team_name, is_active, date_created`,
       [teamName]
     );

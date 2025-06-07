@@ -11,6 +11,23 @@ import { getRoleByName } from '../repositories/roleRepository';
 import { getApprovalStatusByName } from '../repositories/approvalRepository';
 import { BadRequestError, ForbiddenError } from '../utils/errors';
 
+// Role hierarchy for effective permissions
+const ROLE_HIERARCHY: Record<string, string[]> = {
+  AccessAdmin: ['AccessAdmin', 'TeamLead', 'ToDoUser'],
+  TeamLead: ['TeamLead', 'ToDoUser'],
+  ToDoUser: ['ToDoUser'],
+};
+
+// Checks if user has a role, considering inheritance
+function hasEffectiveRole(userRoles: string[], requiredRole: string): boolean {
+  for (const role of userRoles) {
+    if (ROLE_HIERARCHY[role]?.includes(requiredRole)) {
+      return true;
+    }
+  }
+  return false;
+}
+
 // Create a new team with default roles assigned to the creator
 export const createNewTeam = async (teamName: string, userId: number) => {
   const team = await insertTeam(teamName);
@@ -26,11 +43,8 @@ export const createNewTeam = async (teamName: string, userId: number) => {
     throw new Error('Required roles or approval status not found');
   }
 
-  await Promise.all([
-    insertTeamRole(team.id, userId, accessAdmin.id, accepted.id),
-    insertTeamRole(team.id, userId, teamLead.id, accepted.id),
-    insertTeamRole(team.id, userId, todoUser.id, accepted.id)
-  ]);
+  // Only insert AccessAdmin role for creator
+  await insertTeamRole(team.id, userId, accessAdmin.id, accepted.id);
 
   await insertTeamMember(team.id, userId);
 
@@ -62,12 +76,8 @@ export const joinExistingTeam = async (
     throw new Error('Required roles or status not found');
   }
 
-  const inserts = [insertTeamRole(teamId, userId, primaryRole.id, pending.id)];
-  if (roleType === 'TeamLead') {
-    inserts.push(insertTeamRole(teamId, userId, todoUser.id, pending.id));
-  }
-
-  await Promise.all(inserts);
+  // Only insert the primary role (TeamLead or ToDoUser)
+  await insertTeamRole(teamId, userId, primaryRole.id, pending.id);
 
   return { message: 'Join request submitted for approval' };
 };
@@ -83,8 +93,11 @@ export const updateTeamStatus = async (teamId: number, userId: number, isActive:
   if (!team) throw new BadRequestError('Team not found');
 
   const roles = await getUserTeamRoles(userId, teamId);
-  const isAdmin = roles.some(role => role.role_name === 'AccessAdmin');
-  if (!isAdmin) throw new ForbiddenError('Only Access Admins can modify team status');
+  const userRoleNames = roles.map(role => role.role_name);
+
+  if (!hasEffectiveRole(userRoleNames, 'AccessAdmin')) {
+    throw new ForbiddenError('Only Access Admins can modify team status');
+  }
 
   return await updateTeamRepo(teamId, { is_active: isActive });
 };
@@ -95,7 +108,11 @@ export const updateTeamDetails = async (teamId: number, userId: number, teamName
   if (!team) throw new BadRequestError('Team not found');
 
   const roles = await getUserTeamRoles(userId, teamId);
-  const allowed = roles.some(role => ['AccessAdmin', 'TeamLead'].includes(role.role_name));
+  const userRoleNames = roles.map(role => role.role_name);
+
+  const allowed =
+    hasEffectiveRole(userRoleNames, 'AccessAdmin') ||
+    hasEffectiveRole(userRoleNames, 'TeamLead');
   if (!allowed) throw new ForbiddenError('Only Access Admins and Team Leads can modify team details');
 
   return await updateTeamRepo(teamId, { team_name: teamName });
@@ -105,8 +122,10 @@ export const updateTeamDetails = async (teamId: number, userId: number, teamName
 export const acceptJoinRequest = async (teamId: number, userId: number, actingUserId: number) => {
   // Check if acting user is AccessAdmin for this team
   const adminRoles = await getUserTeamRoles(actingUserId, teamId);
-  const isAdmin = adminRoles.some(role => role.role_name === 'AccessAdmin');
-  if (!isAdmin) throw new ForbiddenError('Only Access Admins can approve join requests');
+  const adminRoleNames = adminRoles.map(role => role.role_name);
+  if (!hasEffectiveRole(adminRoleNames, 'AccessAdmin')) {
+    throw new ForbiddenError('Only Access Admins can approve join requests');
+  }
 
   const roles = await getUserTeamRoles(userId, teamId);
   if (!roles.length) throw new BadRequestError('No join request found');
@@ -127,8 +146,10 @@ export const acceptJoinRequest = async (teamId: number, userId: number, actingUs
 export const rejectJoinRequest = async (teamId: number, userId: number, actingUserId: number) => {
   // Check if acting user is AccessAdmin for this team
   const adminRoles = await getUserTeamRoles(actingUserId, teamId);
-  const isAdmin = adminRoles.some(role => role.role_name === 'AccessAdmin');
-  if (!isAdmin) throw new ForbiddenError('Only Access Admins can reject join requests');
+  const adminRoleNames = adminRoles.map(role => role.role_name);
+  if (!hasEffectiveRole(adminRoleNames, 'AccessAdmin')) {
+    throw new ForbiddenError('Only Access Admins can reject join requests');
+  }
 
   const roles = await getUserTeamRoles(userId, teamId);
   if (!roles.length) throw new BadRequestError('No join request found');
