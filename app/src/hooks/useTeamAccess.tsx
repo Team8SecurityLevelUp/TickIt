@@ -1,4 +1,3 @@
-// useTeamAccess.ts
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { fetcher } from '../utils/fetcher';

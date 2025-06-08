@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import './KanbanBoard.css';
 import type { Task } from '../types/Task';
 import KanbanColumn from './KanbanColumn';
@@ -32,73 +32,17 @@ interface FetchedTask {
   completedAt: string | null;
 }
 
-//Mock data for card history
-const taskHistoryData: TaskHistory[] = [
-  {
-    id: 1,
-    taskTitle: 'Setup project repo',
-    oldStatus: 'To Do',
-    newStatus: 'In Progress',
-    ChangedBy: 'Alice',
-    ChangedAt: '2025-06-03T10:30:00Z',
-  },
-  {
-    id: 2,
-    taskTitle: 'Write API endpoints',
-    oldStatus: 'In Progress',
-    newStatus: 'Done',
-    ChangedBy: 'Bob',
-    ChangedAt: '2025-06-04T14:45:00Z',
-  },
-  {
-    id: 2,
-    taskTitle: 'Write API endpoints',
-    oldStatus: 'In Progress',
-    newStatus: 'Done',
-    ChangedBy: 'Bob',
-    ChangedAt: '2025-06-04T14:45:00Z',
-  },
-  {
-    id: 2,
-    taskTitle: 'Write API endpoints',
-    oldStatus: 'In Progress',
-    newStatus: 'Done',
-    ChangedBy: 'Bob',
-    ChangedAt: '2025-06-04T14:45:00Z',
-  },
-  {
-    id: 2,
-    taskTitle: 'Write API endpoints',
-    oldStatus: 'In Progress',
-    newStatus: 'Done',
-    ChangedBy: 'Bob',
-    ChangedAt: '2025-06-04T14:45:00Z',
-  },
-  {
-    id: 2,
-    taskTitle: 'Write API endpoints',
-    oldStatus: 'In Progress',
-    newStatus: 'Done',
-    ChangedBy: 'Bob',
-    ChangedAt: '2025-06-04T14:45:00Z',
-  },
-  {
-    id: 2,
-    taskTitle: 'Write API endpoints',
-    oldStatus: 'In Progress',
-    newStatus: 'Done',
-    ChangedBy: 'Bob',
-    ChangedAt: '2025-06-04T14:45:00Z',
-  },
-  {
-    id: 2,
-    taskTitle: 'Write API endpoints',
-    oldStatus: 'In Progress',
-    newStatus: 'Done',
-    ChangedBy: 'Bob',
-    ChangedAt: '2025-06-04T14:45:00Z',
-  },
-];
+interface FetchedTaskHistory {
+  taskId: number;
+  title: string;
+  oldStatus: string | null;
+  newStatus: string;
+  changedBy: string;
+  changedAt: string;
+  assignedTo: string;
+  previousAssignee: string;
+}
+
 
 const columns = [
   { statusId: 1, title: 'To Do' },
@@ -116,7 +60,7 @@ export default function KanbanBoard() {
   const { teamId } = useParams<{ teamId: string }>();
   const parsedTeamId = Number(teamId);
   const [participants, setParticipants] = useState<Member[]>([]);
-
+  const [taskHistory, setTaskHistory] = useState<TaskHistory[]>([]);
 
   const onDragStart = (e: React.DragEvent, taskId: number) => {
     e.dataTransfer.setData('text/plain', taskId.toString());
@@ -148,6 +92,35 @@ export default function KanbanBoard() {
     });
   };
 
+  const fetchTaskHistory = useCallback(async () => {
+    if (!tasks.length) return;
+
+    try {
+      const taskIds = tasks.map(t => t.taskId);
+
+      const histories = await Promise.all(
+        taskIds.map(id =>
+          fetcher(`/tasks/${id}/history`).catch(() => [])
+        )
+      );
+
+      const flattened: TaskHistory[] = histories.flat().map((h: FetchedTaskHistory, index: number) => ({
+        id: index + 1,
+        taskTitle: h.title,
+        oldStatus: h.oldStatus ?? 'N/A',
+        newStatus: h.newStatus,
+        ChangedBy: h.changedBy,
+        ChangedAt: h.changedAt,
+        assignedTo: h.assignedTo,
+        previousAssignee: h.previousAssignee,
+      }));
+
+      setTaskHistory(flattened);
+    } catch (err) {
+      console.error('Failed to fetch task history:', err);
+    }
+  }, [tasks]);
+
   const openEditModal = (task: Task) => {
     setEditingTask(task);
     setFormData({ ...task });
@@ -161,6 +134,10 @@ export default function KanbanBoard() {
   const deleteTask = (taskId: number) => {
     setTasks(prev => prev.filter(task => task.taskId !== taskId));
   };
+
+  React.useEffect(() => {
+    fetchTaskHistory();
+  }, [fetchTaskHistory]);
 
   React.useEffect(() => {
     if (!parsedTeamId) return;
@@ -306,7 +283,7 @@ export default function KanbanBoard() {
       ))}
         <div className="dashboard-widgets">
           <div className="widget">
-            <TaskHistoryCard history={taskHistoryData} />
+            <TaskHistoryCard history={taskHistory} />
           </div>
           <div className="widget">
             <TaskStatusChart tasks={tasks} />
