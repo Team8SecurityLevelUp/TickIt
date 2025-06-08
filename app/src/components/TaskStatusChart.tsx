@@ -6,7 +6,7 @@ interface Props {
   tasks: Task[];
 }
 
-const COLORS = ['#8884d8', '#ffc658', '#82ca9d'];
+const COLORS = ['#4F64B5', '#fbbf24', '#16a34a'];
 
 const TaskStatusChart: React.FC<Props> = ({ tasks }) => {
   const statusData = [
@@ -39,7 +39,7 @@ const TaskStatusChart: React.FC<Props> = ({ tasks }) => {
               ))}
             </Pie>
             <Tooltip />
-            <Legend verticalAlign="bottom" height={36} />
+            <Legend verticalAlign="bottom" height={36}/>
           </PieChart>
         </ResponsiveContainer>
       )}

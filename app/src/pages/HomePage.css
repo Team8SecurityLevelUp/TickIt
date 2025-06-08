@@ -8,7 +8,10 @@ body, html {
   font-family: 'Segoe UI', sans-serif;
   background: linear-gradient(135deg, #4F64B5, #80C9F7);
   color: #1f2937;
-  min-height: 100vh;
+  min-height: 100%;
+  height: 100%;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
 }
 
 
