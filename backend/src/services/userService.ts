@@ -11,6 +11,7 @@ updateUnverifiedUser
 import * as bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { sendVerificationEmail } from '../utils/emailSender';
+import { getPepper } from '../utils/getPepper';
 
 export const registerUser = async (username: string, password: string, email: string) => {
     const user = await getUserByEmail(email);
@@ -27,7 +28,8 @@ export const registerUser = async (username: string, password: string, email: st
         updateUser = true;
     }
 
-    const hash = await bcrypt.hash(password, 10); 
+    const password_pepper = getPepper();
+    const hash = await bcrypt.hash(password + password_pepper, 10); 
 
     let newUser;
     if (updateUser) {
@@ -64,7 +66,8 @@ export const authenticateUser = async (email: string, password: string) => {
   const user = await getVerifiedUserByEmail(email);
   if (!user) return null;
 
-  const match = await bcrypt.compare(password, user.password_hash);
+  const password_pepper = getPepper();
+  const match = await bcrypt.compare(password + password_pepper, user.password_hash);
   if (!match) return null;
 
   const payload = {
