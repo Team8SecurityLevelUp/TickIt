@@ -8,7 +8,8 @@ import {
   deactivateTeam, 
   updateTeam,
   respondJoinRequest,
-  getTeamParticipants
+  getTeamParticipants,
+  updateUserRole
 } from "../controllers/teamController";
 import { authenticateJwt } from '../middlewares/auth';
 
@@ -29,5 +30,7 @@ router.post("/respond", respondJoinRequest);
 router.put("/:teamId/deactivate", deactivateTeam);
 
 router.put("/:teamId", validateRequest(teamCreationSchema), updateTeam);
+
+router.put("/update-role", updateUserRole);
 
 export default router;

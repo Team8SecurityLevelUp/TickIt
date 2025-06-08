@@ -66,9 +66,6 @@ export const fetchTeamParticipants = async (teamId: number) => {
   return result.rows;
 };
 
-
-
-
 export const getUserTeamRoles = async (userId: number, teamId?: number) => {
   try {
     let query = `
@@ -243,4 +240,19 @@ export const updateTeamRoleApprovalStatus = async (
   } catch (error) {
     throw new DatabaseError(`Failed to update approval status: ${(error as Error).message}`);
   }
+};
+
+export const updateTeamRole = async (
+  teamId: number,
+  userId: number,
+  newRoleId: number
+) => {
+  const result = await db.query(
+    `UPDATE team_roles
+     SET role_id = $3
+     WHERE team_id = $1 AND user_id = $2
+     RETURNING id, role_id`,
+    [teamId, userId, newRoleId]
+  );
+  return result.rows[0];
 };
