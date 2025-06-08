@@ -4,8 +4,10 @@
   align-items: center;
   padding: 2rem 1rem;
   min-height: 100vh;
-  background-color: #f9fafb;
+  min-width: 100%;
   overflow-y: auto;
+  background: #4F64B5;
+  background: linear-gradient(135deg, #4F64B5, #80C9F7);
   box-sizing: border-box;
 }
 
@@ -42,8 +44,16 @@
   border-radius: 4px;
 }
 
+.auth-logo {
+  width: 10rem;
+  height: auto;
+  margin: 0 auto 2rem;
+  display: block;
+  max-width: 80%;
+}
+
 .auth-form button {
-  background-color: #2563eb;
+  background-color: #3362ec;
   color: white;
   padding: 0.6rem;
   font-size: 1rem;
@@ -70,4 +80,9 @@
 
 .auth-form a:hover {
   text-decoration: underline;
+}
+
+.form-error {
+  color: #dc2626;
+  margin-bottom: 1rem;
 }
