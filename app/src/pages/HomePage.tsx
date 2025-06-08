@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { JoinTeamModal } from '../components/JoinTeamModal';
 import { useAuth } from '../auth/useAuth';
 import { fetcher } from '../utils/fetcher';
+import TickItLogo from '../assets/TickItLogo.png';
 
 type Team = {
   team_id: number;
@@ -76,8 +77,8 @@ export const HomePage = () => {
 
               hide();
               fetcher('/teams')
-              .then((res) => setTeams(res.data))
-              .catch((err) => console.error('Failed to load teams', err));
+                .then((res) => setTeams(res.data))
+                .catch((err) => console.error('Failed to load teams', err));
             } catch (err: unknown) {
               console.error('Failed to join team:', err);
             }
@@ -124,22 +125,27 @@ export const HomePage = () => {
     <main>
       <section className="container">
         <header className="top-bar">
-          <h1>TickIt</h1>
+          <img
+            src={TickItLogo}
+            alt="App Logo"
+            className="logo"
+          />
           <nav className="top-bar-actions">
             <button type="button" onClick={openCreateTeamModal}>+ Create Team</button>
-            <button type="button" onClick={async () => {
+              <button type="button" onClick={openFilterModal}>
+            Filter options
+          </button>
+            
+          </nav>
+        </header>
+
+        <section className="logout-button-wrapper">
+        <button type="button" className="logout-button" onClick={async () => {
               await logout();
               window.location.href = '/login';
             }}>
               Logout
             </button>
-          </nav>
-        </header>
-
-        <section>
-          <button type="button" className="filter-button" onClick={openFilterModal}>
-            Filter options
-          </button>
         </section>
 
         <section className="team-list">

@@ -3,6 +3,7 @@ import React from 'react';
 import { fetcher } from '../utils/fetcher';
 import { Loading } from '../components/Loading';
 import { useAuth } from '../auth/useAuth';
+import TickItLogo from '../assets/TickItLogo.png';
 import './AuthPages.css';
 
 export const Signup = () => {
@@ -37,6 +38,12 @@ export const Signup = () => {
         className='auth-form'
         onSubmit={(e) => e.preventDefault()}
       >
+        <img
+          src={TickItLogo}
+          alt="App Logo"
+          className="auth-logo"
+        />
+        
         <h1
           className='auth-title'
         >
@@ -50,6 +57,7 @@ export const Signup = () => {
           type='text'
           value={username}
           onChange={(e) => setUsername(e.target.value)}
+          placeholder='Enter a unique username'
         />
 
         <label>
@@ -59,6 +67,7 @@ export const Signup = () => {
           type='email'
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          placeholder='example@email.com'
         />
 
         <label>
@@ -68,6 +77,7 @@ export const Signup = () => {
           type='password'
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          placeholder='Enter your password'
         />
 
         {formError && (
@@ -86,7 +96,7 @@ export const Signup = () => {
         </button>
 
         <p>
-          Already have an account? 
+          Already have an account?{' '}
           <Link 
             to='/login'
           >
