@@ -57,6 +57,10 @@ export default function TaskHistoryCard({ history }: Props) {
     );
   });
 
+  const sortedHistory = [...filteredHistory].sort((a, b) => {
+    return new Date(b.ChangedAt).getTime() - new Date(a.ChangedAt).getTime();
+  });
+
   return (
     <section className="task-history-card">
       <header>
@@ -138,11 +142,11 @@ export default function TaskHistoryCard({ history }: Props) {
 
       {}
       <section aria-label="Task history timeline" style={{ overflowY: 'auto', flexGrow: 1 }}>
-        {filteredHistory.length === 0 ? (
+        {sortedHistory.length === 0 ? (
           <p>No task history available.</p>
         ) : (
           <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-            {filteredHistory.map(entry => {
+            {sortedHistory.map(entry => {
               const formattedDate = new Date(entry.ChangedAt).toLocaleString();
               const statusChanged = entry.oldStatus !== entry.newStatus;
               const reassigned =

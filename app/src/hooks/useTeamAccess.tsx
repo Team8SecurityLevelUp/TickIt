@@ -20,9 +20,9 @@ export const useTeamAccess = (teamId: string | undefined) => {
         const currentUserId = res.data.currentUserId;
         const isMember = res.data.members.some((m: Member) => m.user_id === currentUserId);
         setAllowed(isMember);
-        if (!isMember) navigate('/');
+        if (!isMember) navigate('/NotFound');
       })
-      .catch(() => navigate('/'));
+      .catch(() => navigate('/NotFound'));
   }, [teamId, navigate]);
 
   return allowed;
