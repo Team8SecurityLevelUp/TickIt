@@ -159,7 +159,7 @@ export const HomePage = () => {
               Declined: 'Request Declined',
               AccessAdmin: 'Access Admin',
               TeamLead: 'Team Lead',
-              ToDoUser: 'Collaborator',
+              ToDoUser: 'To Do User',
             }[role] ?? role;
 
             return (
