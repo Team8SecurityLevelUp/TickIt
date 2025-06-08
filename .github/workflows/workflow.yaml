@@ -224,6 +224,7 @@ jobs:
             SMTP_USER, smtpuser
             SMTP_PASSWORD, smtppass
             JWT_SECRET, jwtsecret
+            PASSWORD_PEPPER, passwordpepper
 
       - name: Download build artifact
         uses: actions/download-artifact@v4
@@ -250,6 +251,7 @@ jobs:
           SMTP_USER=${{ env.SMTP_USER }}
           SMTP_PASSWORD=${{ env.SMTP_PASSWORD }}
           JWT_SECRET=${{ env.JWT_SECRET }}
+          PEPPER=${{ env.PASSWORD_PEPPER }}
           EOF
           '
       
