@@ -8,6 +8,7 @@ import { TeamBoard } from './pages/TeamBoard';
 import { NotFound } from './pages/NotFound';
 import { PublicOnlyRoute } from './PublicOnlyRoutes';
 import { ModalProvider } from './components/ModalProvider';
+import TestQRCode from './components/testqrcode';
 
 export const AppWrapper = () => (
   <AuthProvider>
@@ -18,6 +19,7 @@ export const AppWrapper = () => (
           <Route path="/login" element={<PublicOnlyRoute><Login /></PublicOnlyRoute>} />
           <Route path="/signup" element={<PublicOnlyRoute><Signup /></PublicOnlyRoute>} />
           <Route path='/team-board' element={<PrivateRoute><TeamBoard /></PrivateRoute>} />
+          <Route path="/test-qr" element={<TestQRCode />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Router>

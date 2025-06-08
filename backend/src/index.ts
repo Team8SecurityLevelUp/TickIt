@@ -3,6 +3,7 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
+import session from 'express-session';
 import userRoutes from './routes/userRoutes';
 import taskRoutes from './routes/taskRoutes';
 import teamRoutes from './routes/teamRoutes';
@@ -25,6 +26,15 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(cookieParser());
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'your-secret-key',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: process.env.NODE_ENV === 'production',
+    maxAge: 5 * 60 * 1000 // 5 minutes
+  }
+}));
 app.use('/api/user', userRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use('/api/teams', teamRoutes);

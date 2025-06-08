@@ -16,6 +16,7 @@ export const authenticateJwt = (req: Request, res: Response, next: NextFunction)
 
   if (!token) {
     res.status(401).json({ message: 'Unauthorized: No token provided' });
+    return; 
   }
 
   try {
@@ -23,10 +24,9 @@ export const authenticateJwt = (req: Request, res: Response, next: NextFunction)
     if (!JWT_SECRET) {
       throw new Error('Missing JWT_SECRET in environment variables');
     }
-
+    
     const decoded = jwt.verify(token, JWT_SECRET);
 
-  
     if (
       typeof decoded === 'object' &&
       decoded !== null &&
@@ -35,12 +35,13 @@ export const authenticateJwt = (req: Request, res: Response, next: NextFunction)
     ) {
       const userId = typeof decoded.sub === 'string' ? parseInt(decoded.sub, 10) : decoded.sub;
       req.user = { id: userId };
-      next(); 
-      return; 
+      next();
     } else {
       res.status(401).json({ message: 'Unauthorized: Invalid token payload' });
+      return; 
     }
   } catch (error) {
     res.status(401).json({ message: 'Unauthorized: Invalid token' });
+    return; 
   }
 };
