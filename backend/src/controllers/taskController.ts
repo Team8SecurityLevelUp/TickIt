@@ -80,7 +80,7 @@ export const updateTaskStatus = async (req: Request, res: Response, next: NextFu
 export const assignTask = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         const taskId = parseInt(req.params.taskId);
-        const { assignedUserId } = req.body;
+        const { assignedUserId, userId } = req.body;
 
         if (isNaN(taskId)) {
             res.status(400).json({
@@ -88,10 +88,17 @@ export const assignTask = async (req: Request, res: Response, next: NextFunction
             });
             return;
         }
+        if (!userId) {
+            res.status(400).json({
+                error: 'Acting userId is required'
+            });
+            return;
+        }
 
         const task = await taskRepository.assignTask(
             taskId,
-            assignedUserId || null
+            assignedUserId || null,
+            userId 
         );
 
         res.status(200).json(task);

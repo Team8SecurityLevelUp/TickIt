@@ -59,6 +59,12 @@ export default {
                 [teamId, title, description, statusId, createdBy, assignedTo, createdAt, dueDate, completedAt]
             );
 
+            await client.query(
+                `INSERT INTO task_history (task_id, new_status, assigned_user_id, changed_by)
+                 VALUES ($1, $2, $3, $4)`,
+                [result.rows[0].taskId, statusId, assignedTo, createdBy]
+            );
+
             await client.query('COMMIT');
             return result.rows[0];
         } catch (error) {
@@ -91,9 +97,9 @@ export default {
             }
 
             await client.query(
-                `INSERT INTO task_status_history (task_id, new_status, changed_by)
-                 VALUES ($1, $2, $3)`,
-                [taskId, newStatusId, changedByUserId]
+                `INSERT INTO task_history (task_id, new_status, changed_by, assigned_user_id)
+                 VALUES ($1, $2, $3, $4)`,
+                [taskId, newStatusId, changedByUserId, null]
             );
 
             const result = await client.query(
@@ -129,7 +135,8 @@ export default {
 
     async assignTask(
         taskId: number,
-        assignedUserId: number | null
+        assignedUserId: number | null,
+        userId: number
     ): Promise<Task> {
         const client = await db.connect();
         try {
@@ -146,6 +153,12 @@ export default {
             if (updateResult.rows.length === 0) {
                 throw new Error('Task not found');
             }
+
+            await client.query(
+                `INSERT INTO task_history (task_id, assigned_user_id, changed_by)
+                 VALUES ($1, $2, $3)`,
+                [taskId, assignedUserId, userId]
+            );
 
             const result = await client.query(
                 `SELECT
@@ -315,7 +328,7 @@ export default {
             }
 
             await client.query(
-                `INSERT INTO task_status_history (task_id, new_status, changed_by)
+                `INSERT INTO task_history (task_id, new_status, changed_by)
                  VALUES ($1, 4, $2)`,
                 [taskId, userId]
             );
@@ -365,7 +378,7 @@ export default {
                 ts.status as "newStatus",
                 u.username as "changedBy",
                 tsh.changed_at as "changedAt"
-            FROM task_status_history tsh
+            FROM task_history tsh
             JOIN task_statuses ts ON tsh.new_status = ts.id
             JOIN users u ON tsh.changed_by = u.id
             WHERE tsh.task_id = $1

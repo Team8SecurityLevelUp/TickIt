@@ -10,6 +10,7 @@ import {
   fetchTeamParticipants
 } from '../repositories/teamRepository';
 import { getRoleByName } from '../repositories/roleRepository';
+import { updateTeamRole } from '../repositories/teamRepository'; // You'll need to implement this
 import { getApprovalStatusByName } from '../repositories/approvalRepository';
 import { BadRequestError, ForbiddenError } from '../utils/errors';
 
@@ -200,6 +201,25 @@ export const fetchTeamParticipantsService = async (teamId: number) => {
 
   const members = Object.values(memberMap);
   return { members, joinRequests };
+};
+
+// Update a user's role on a team (AccessAdmins only)
+export const updateUserRoleOnTeam = async (
+  teamId: number,
+  targetUserId: number,
+  newRoleName: string,
+  actingUserId: number
+) => {
+  const roles = await getUserTeamRoles(actingUserId, teamId);
+  const userRoleNames = roles.map(role => role.role_name);
+  if (!hasEffectiveRole(userRoleNames, 'AccessAdmin')) {
+    throw new ForbiddenError('Only Access Admins can update roles');
+  }
+
+  const newRole = await getRoleByName(newRoleName);
+  if (!newRole) throw new BadRequestError('Role not found');
+
+  return await updateTeamRole(teamId, targetUserId, newRole.id);
 };
 
 

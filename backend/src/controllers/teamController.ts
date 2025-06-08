@@ -7,7 +7,8 @@ import {
   updateTeamDetails,
   acceptJoinRequest,
   rejectJoinRequest,
-  fetchTeamParticipantsService
+  fetchTeamParticipantsService,
+  updateUserRoleOnTeam
 } from '../services/teamService';
 import { BadRequestError, UnauthorizedError } from '../utils/errors';
 
@@ -155,6 +156,18 @@ export const deactivateTeam = async (req: Request, res: Response, next: NextFunc
       status: 'success',
       message: 'Team deactivated successfully'
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// update user role on team
+export const updateUserRole = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    if (!req.user) throw new UnauthorizedError();
+    const { teamId, targetUserId, newRoleName } = req.body;
+    const result = await updateUserRoleOnTeam(teamId, targetUserId, newRoleName, req.user.id);
+    res.status(200).json({ status: 'success', data: result });
   } catch (error) {
     next(error);
   }
