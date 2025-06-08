@@ -157,7 +157,7 @@ export default function TaskHistoryCard({ history }: Props) {
 
               if (statusChanged) {
                 descriptionParts.push(
-                  `Status changed from ${entry.oldStatus ?? 'N/A'} to ${entry.newStatus}`
+                  `${!!entry.oldStatus && `Status changed from ${entry.oldStatus} to ${entry.newStatus}` || `Created`}`
                 );
               }
 

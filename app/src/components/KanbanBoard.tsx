@@ -107,7 +107,7 @@ export default function KanbanBoard() {
       const flattened: TaskHistory[] = histories.flat().map((h: FetchedTaskHistory, index: number) => ({
         id: index + 1,
         taskTitle: h.title,
-        oldStatus: h.oldStatus ?? 'N/A',
+        oldStatus: h.oldStatus,
         newStatus: h.newStatus,
         ChangedBy: h.changedBy,
         ChangedAt: h.changedAt,
