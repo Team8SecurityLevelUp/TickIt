@@ -142,6 +142,12 @@ export default {
         try {
             await client.query('BEGIN');
 
+            const statusResult = await client.query(
+                `SELECT status_id FROM tasks WHERE id = $1`,
+                [taskId]
+            );
+            const currentStatusId = statusResult.rows[0].status_id;
+
             const updateResult = await client.query(
                 `UPDATE tasks 
                  SET assigned_user_id = $1
@@ -155,9 +161,9 @@ export default {
             }
 
             await client.query(
-                `INSERT INTO task_history (task_id, assigned_user_id, changed_by)
-                 VALUES ($1, $2, $3)`,
-                [taskId, assignedUserId, userId]
+                `INSERT INTO task_history (task_id, new_status, assigned_user_id, changed_by)
+                 VALUES ($1, $2, $3, $4)`,
+                [taskId, currentStatusId ,assignedUserId, userId]
             );
 
             const result = await client.query(
@@ -368,19 +374,28 @@ export default {
         taskId: number
     ): Promise<Array<{
         taskId: number;
+        title: string;
         newStatus: string;
         changedBy: string;
         changedAt: Date;
+        previousAssignee: string | null;
+        assignedTo: string | null;
     }>> {
         const result = await db.query(
             `SELECT
                 tsh.task_id as "taskId",
+                t.title as "title",
                 ts.status as "newStatus",
+                LAG(ts.status) OVER (PARTITION BY tsh.task_id ORDER BY tsh.changed_at) AS "oldStatus",
                 u.username as "changedBy",
-                tsh.changed_at as "changedAt"
+                tsh.changed_at as "changedAt",
+                au.username as "assignedTo",
+                LAG(au.username) OVER (PARTITION BY tsh.task_id ORDER BY tsh.changed_at) AS "previousAssignee"
             FROM task_history tsh
             JOIN task_statuses ts ON tsh.new_status = ts.id
             JOIN users u ON tsh.changed_by = u.id
+            JOIN tasks t ON tsh.task_id = t.id
+            LEFT JOIN users au ON tsh.assigned_user_id = au.id
             WHERE tsh.task_id = $1
             ORDER BY tsh.changed_at DESC`,
             [taskId]

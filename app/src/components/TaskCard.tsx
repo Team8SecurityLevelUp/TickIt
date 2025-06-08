@@ -25,7 +25,7 @@ export default function TaskCard({task, onDragStart, onClick, onDelete, particip
       <button
         className="delete-btn"
         onClick={(e) => {
-          e.stopPropagation(); // Prevent opening modal
+          e.stopPropagation();
           onDelete(task.taskId);
         }}
         aria-label="Delete task"

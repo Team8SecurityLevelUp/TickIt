@@ -1,4 +1,3 @@
-// ModalContext.tsx
 import { useState, useCallback,type ReactNode } from 'react';
 import { ModalContext } from './ModalContext';
 

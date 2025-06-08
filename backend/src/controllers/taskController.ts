@@ -79,8 +79,10 @@ export const updateTaskStatus = async (req: Request, res: Response, next: NextFu
 
 export const assignTask = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
+        if (!req.user) throw new UnauthorizedError();
+        const userId = req.user.id;
         const taskId = parseInt(req.params.taskId);
-        const { assignedUserId, userId } = req.body;
+        const { assignedUserId } = req.body;
 
         if (isNaN(taskId)) {
             res.status(400).json({
