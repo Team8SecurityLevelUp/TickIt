@@ -15,28 +15,34 @@ const TaskStatusChart: React.FC<Props> = ({ tasks }) => {
     { name: 'Done', value: tasks.filter(t => t.statusId === 3).length },
   ];
 
+  const totalTasks = statusData.reduce((sum, entry) => sum + entry.value, 0);
+
   return (
-    <div style={{ width: '100%', height: 300 }}>
-      <h3 style={{ textAlign: 'center' }}>Task Distribution</h3>
-      <ResponsiveContainer>
-        <PieChart>
-          <Pie
-            data={statusData}
-            dataKey="value"
-            nameKey="name"
-            cx="50%"
-            cy="50%"
-            outerRadius={100}
-            label
-          >
-            {statusData.map((_, index) => (
-              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-            ))}
-          </Pie>
-          <Tooltip />
-          <Legend verticalAlign="bottom" height={36} />
-        </PieChart>
-      </ResponsiveContainer>
+    <div className='task-history-card'>
+      <h3>Task Distribution</h3>
+      {totalTasks === 0 ? (
+        <p>No tasks to display. Add tasks to see distribution.</p>
+      ) : (
+        <ResponsiveContainer>
+          <PieChart>
+            <Pie
+              data={statusData}
+              dataKey="value"
+              nameKey="name"
+              cx="50%"
+              cy="50%"
+              outerRadius={100}
+              label
+            >
+              {statusData.map((_, index) => (
+                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+              ))}
+            </Pie>
+            <Tooltip />
+            <Legend verticalAlign="bottom" height={36} />
+          </PieChart>
+        </ResponsiveContainer>
+      )}
     </div>
   );
 };

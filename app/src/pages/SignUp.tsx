@@ -30,10 +30,10 @@ export const Signup = () => {
   };
 
   return (
-    <main 
+    <main
       className='auth-wrapper'
     >
-    
+
       {!signupSuccess && (<form
         className='auth-form'
         onSubmit={(e) => e.preventDefault()}
@@ -43,7 +43,7 @@ export const Signup = () => {
           alt="App Logo"
           className="auth-logo"
         />
-        
+
         <h1
           className='auth-title'
         >
@@ -88,7 +88,7 @@ export const Signup = () => {
           </p>
         )}
 
-        <button 
+        <button
           type='submit'
           onClick={signup}
         >
@@ -97,34 +97,34 @@ export const Signup = () => {
 
         <p>
           Already have an account?{' '}
-          <Link 
+          <Link
             to='/login'
           >
             Login
           </Link>
         </p>
       </form>) ||
-      (
-        <section 
-          className='auth-form'
-        >
-          <h1 className='auth-title'>Verify Your Email</h1>
-          <p>We've sent a verification link to &nbsp;
-            <strong>
-              {email}
-            </strong>
-          </p>
-          <p>Please check your inbox to completed your signup.</p>
-          <p>
-            Once verified, you can &nbsp;
+        (
+          <section
+            className='auth-form'
+          >
+            <h1 className='auth-title'>Verify Your Email</h1>
+            <p>We've sent a verification link to &nbsp;
+              <strong>
+                {email}
+              </strong>
+            </p>
+            <p>Please check your inbox to completed your signup.</p>
+            <p>
+              Once verified, you can &nbsp;
               <Link
                 to='/login'
               >
                 log in here
               </Link>.
-          </p>
-        </section>
-      )
+            </p>
+          </section>
+        )
       }
     </main>
   );

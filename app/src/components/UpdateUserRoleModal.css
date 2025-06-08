@@ -6,10 +6,8 @@
   width: 100%;
   max-width: 500px;
   margin: 0 auto;
-  box-sizing: border-box;
   background: white;
   padding: 2rem;
-  border: 2px solid black;
   box-sizing: border-box;
 }
 
@@ -71,19 +69,19 @@
 }
 
 .close-modal-button {
-  margin-top: 1rem;
-  padding: 0.6rem 1rem;
+  padding: 0.75rem 1rem;
+  background-color: transparent;
+  border: 1px solid #2563eb;
+  color: #2563eb;
+  font-weight: 600;
   font-size: 1rem;
-  font-weight: bold;
-  background: none;
-  border: 2px solid black;
+  border-radius: 0.5rem;
   cursor: pointer;
-  align-self: center;
+  transition: background 0.2s ease;
 }
 
 .close-modal-button:hover {
-  background: black;
-  color: white;
+    background-color: transparent;
 }
 
 .update-role-modal h3 {
