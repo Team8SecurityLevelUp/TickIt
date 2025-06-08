@@ -59,6 +59,12 @@ export default {
                 [teamId, title, description, statusId, createdBy, assignedTo, createdAt, dueDate, completedAt]
             );
 
+            await client.query(
+                `INSERT INTO task_history (task_id, new_status, assigned_user_id, changed_by)
+                 VALUES ($1, $2, $3, $4)`,
+                [result.rows[0].taskId, statusId, assignedTo, createdBy]
+            );
+
             await client.query('COMMIT');
             return result.rows[0];
         } catch (error) {
@@ -91,9 +97,9 @@ export default {
             }
 
             await client.query(
-                `INSERT INTO task_status_history (task_id, new_status, changed_by)
-                 VALUES ($1, $2, $3)`,
-                [taskId, newStatusId, changedByUserId]
+                `INSERT INTO task_history (task_id, new_status, changed_by, assigned_user_id)
+                 VALUES ($1, $2, $3, $4)`,
+                [taskId, newStatusId, changedByUserId, null]
             );
 
             const result = await client.query(
@@ -129,11 +135,18 @@ export default {
 
     async assignTask(
         taskId: number,
-        assignedUserId: number | null
+        assignedUserId: number | null,
+        userId: number
     ): Promise<Task> {
         const client = await db.connect();
         try {
             await client.query('BEGIN');
+
+            const statusResult = await client.query(
+                `SELECT status_id FROM tasks WHERE id = $1`,
+                [taskId]
+            );
+            const currentStatusId = statusResult.rows[0].status_id;
 
             const updateResult = await client.query(
                 `UPDATE tasks 
@@ -146,6 +159,12 @@ export default {
             if (updateResult.rows.length === 0) {
                 throw new Error('Task not found');
             }
+
+            await client.query(
+                `INSERT INTO task_history (task_id, new_status, assigned_user_id, changed_by)
+                 VALUES ($1, $2, $3, $4)`,
+                [taskId, currentStatusId ,assignedUserId, userId]
+            );
 
             const result = await client.query(
                 `SELECT
@@ -181,7 +200,8 @@ export default {
     async updateTaskDetails(
         taskId: number,
         title: string,
-        description: string
+        description: string,
+        dueDate: Date | null
     ): Promise<Task> {
         const client = await db.connect();
         try {
@@ -189,10 +209,10 @@ export default {
 
             const updateResult = await client.query(
                 `UPDATE tasks 
-                 SET title = $1, description = $2
-                 WHERE id = $3
+                 SET title = $1, description = $2, due_date = $3
+                 WHERE id = $4
                  RETURNING *`,
-                [title, description, taskId]
+                [title, description, dueDate,taskId]
             );
 
             if (updateResult.rows.length === 0) {
@@ -314,7 +334,7 @@ export default {
             }
 
             await client.query(
-                `INSERT INTO task_status_history (task_id, new_status, changed_by)
+                `INSERT INTO task_history (task_id, new_status, changed_by)
                  VALUES ($1, 4, $2)`,
                 [taskId, userId]
             );
@@ -354,19 +374,28 @@ export default {
         taskId: number
     ): Promise<Array<{
         taskId: number;
+        title: string;
         newStatus: string;
         changedBy: string;
         changedAt: Date;
+        previousAssignee: string | null;
+        assignedTo: string | null;
     }>> {
         const result = await db.query(
             `SELECT
                 tsh.task_id as "taskId",
+                t.title as "title",
                 ts.status as "newStatus",
+                LAG(ts.status) OVER (PARTITION BY tsh.task_id ORDER BY tsh.changed_at) AS "oldStatus",
                 u.username as "changedBy",
-                tsh.changed_at as "changedAt"
-            FROM task_status_history tsh
+                tsh.changed_at as "changedAt",
+                au.username as "assignedTo",
+                LAG(au.username) OVER (PARTITION BY tsh.task_id ORDER BY tsh.changed_at) AS "previousAssignee"
+            FROM task_history tsh
             JOIN task_statuses ts ON tsh.new_status = ts.id
             JOIN users u ON tsh.changed_by = u.id
+            JOIN tasks t ON tsh.task_id = t.id
+            LEFT JOIN users au ON tsh.assigned_user_id = au.id
             WHERE tsh.task_id = $1
             ORDER BY tsh.changed_at DESC`,
             [taskId]
@@ -425,5 +454,30 @@ export default {
         }
 
         return result.rows[0];
-    }
+    },
+
+    async getTasksByTeam(teamId: number): Promise<Task[]> {
+        const result = await db.query(
+            `
+            SELECT
+            t.id as "taskId",
+            t.team_id as "teamId",
+            t.title,
+            t.description,
+            t.status_id as "statusId",
+            t.created_by_user_id as "createdBy",
+            t.assigned_user_id as "assignedTo",
+            t.created_at as "createdAt",
+            t.due_date as "dueDate",
+            t.completed_at as "completedAt"
+            FROM tasks t
+            WHERE t.team_id = $1 AND t.status_id != 4
+            ORDER BY t.created_at DESC
+            `,
+            [teamId]
+        );
+
+        return result.rows;
+        }
 };
+

@@ -1,6 +1,7 @@
 import React from 'react';
 import './EditTaskModal.css';
 import type { Task } from '../types/Task';
+import type { Member } from './KanbanBoard';
 
 interface EditTaskModalProps {
   task: Task;
@@ -8,13 +9,14 @@ interface EditTaskModalProps {
   onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
   onSave: () => void;
   onCancel: () => void;
+  participants: Member[];
 }
 
-export default function EditTaskModal({formData, onChange, onSave, onCancel }: EditTaskModalProps) {
+export default function EditTaskModal({formData, onChange, onSave, onCancel, participants }: EditTaskModalProps) {
   return (
     <div className="modal-backdrop" onClick={onCancel}>
       <div className="modal-content" onClick={e => e.stopPropagation()}>
-        <h2>{formData.taskId ? 'Edit Task' : 'Create Task'}</h2>
+        <h2 className='task-modal-title'>{formData.taskId ? 'Edit Task' : 'Create Task'}</h2>
         <label>
           Title:<br />
           <input
@@ -24,7 +26,7 @@ export default function EditTaskModal({formData, onChange, onSave, onCancel }: E
             onChange={onChange}
           />
         </label>
-        <br />
+
         <label>
           Description:<br />
           <textarea
@@ -33,44 +35,40 @@ export default function EditTaskModal({formData, onChange, onSave, onCancel }: E
             onChange={onChange}
           />
         </label>
-        <br />
-        <label>
+
+        {formData.taskId && (<label>
           Assigned To:<br />
-          <input
+          <select
             name="assignedTo"
-            type="number"
-            value={formData.assignedTo || 0}
+            value={formData.assignedTo ?? ''}
             onChange={onChange}
-          />
-        </label>
-        <br />
+          >
+            <option value="">Unassigned</option>
+            {participants.map((user) => (
+              <option key={user.user_id} value={user.user_id}>
+                {user.username}
+              </option>
+            ))}
+          </select>
+        </label>)}
+      
         <label>
           Due Date:<br />
           <input
             name="dueDate"
             type="date"
-            value={formData.dueDate ? formData.dueDate.toISOString().split('T')[0] : ''}
+            value={
+              formData.dueDate
+                ? new Date(formData.dueDate).toISOString().split('T')[0]
+                : ''
+            }
             onChange={onChange}
           />
         </label>
-        <br />
-        <label>
-          Status:<br />
-          <select
-            name="statusId"
-            value={formData.statusId || 1}
-            onChange={onChange}
-          >
-            <option value={1}>To Do</option>
-            <option value={2}>In Progress</option>
-            <option value={3}>Done</option>
-          </select>
-        </label>
-        <br /><br />
-        <button onClick={onSave} style={{ marginRight: '0.5rem' }}>
+        <button className='save-button' onClick={onSave} style={{ marginRight: '0.5rem' }}>
           Save
         </button>
-        <button onClick={onCancel}>Cancel</button>
+        <button className='cancel-task-button' onClick={onCancel}>Cancel</button>
       </div>
     </div>
   );

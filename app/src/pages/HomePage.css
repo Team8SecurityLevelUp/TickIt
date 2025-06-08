@@ -5,18 +5,31 @@
 }
 
 body, html {
-  font-family: sans-serif;
-  background-color: white;
-  color: black;
+  font-family: 'Segoe UI', sans-serif;
+  background: linear-gradient(135deg, #4F64B5, #80C9F7);
+  color: #1f2937;
+  min-height: 100%;
+  height: 100%;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
 }
 
+
 main {
-  padding: 1rem;
-  max-width: 900px;
-  margin: 0 auto;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 2rem 1rem;
+  min-height: 100vh;
 }
 
 .container {
+  background-color: white;
+  padding: 2.5rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.07);
+  width: 100%;
+  max-width: 80vw;
   display: flex;
   flex-direction: column;
   gap: 2rem;
@@ -24,38 +37,72 @@ main {
 
 .top-bar {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
-  border: 2px solid black;
-  padding: 1rem;
+  gap: 1rem;
 }
 
-.top-bar button {
-  padding: 0.5rem 1rem;
-  border: 2px solid black;
-  background: none;
-  cursor: pointer;
-  font-weight: bold;
+.top-bar h1 {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: #3362ec;
 }
 
-.filter-button {
-  width: 100%;
-  padding: 1rem;
+.top-bar-actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.top-bar-actions button {
+  background-color: #3362ec;
+  color: white;
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: 0.3rem;
   font-weight: bold;
-  border: 2px solid black;
-  background: none;
   cursor: pointer;
-  text-align: center;
+  transition: background 0.2s ease-in-out;
+}
+
+.top-bar-actions button:hover {
+  background-color: #1d4ed8;
 }
 
 .create-team-button {
-  width: 100%;
+  background-color: #2563eb;
+  color: white;
   padding: 1rem;
   font-weight: bold;
-  border: 2px solid black;
-  background: none;
-  cursor: pointer;
+  border: none;
+  border-radius: 4px;
   text-align: center;
+  cursor: pointer;
+  transition: background 0.2s ease-in-out;
+}
+
+.logout-button {
+  color: #2563eb;
+  padding: 0.6rem 1.2rem;
+  width: 16.75rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 0.3rem;
+  border: 1px solid  #2563eb;;
+  background-color: transparent;
+  text-align: center;
+  cursor: pointer;
+  transition: background 0.2s ease-in-out;
+}
+
+.create-team-button:hover {
+  background-color: #1d4ed8;
+}
+
+.logout-button:hover
+{
+  background-color: #1d4ed8;
+  color: white;
 }
 
 .team-list {
@@ -71,54 +118,58 @@ main {
 }
 
 .team-card {
-  border: 2px solid black;
+  background-color: #f1f5f9;
+  border-radius: 0.5rem;
   padding: 1rem;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  height: 150px;
-  position: relative;
+  transition: transform 0.1s ease;
+  cursor: pointer;
+}
+
+.team-card:hover {
+  transform: translateY(-0.05rem);
+  background-color: #e4e7eb;
+}
+
+.team-card.disabled {
+  opacity: 0.6;
+  cursor: default;
+  pointer-events: none;
 }
 
 .card-header {
   display: flex;
   justify-content: space-between;
-  align-items: baseline;
-  margin-bottom: 0.5rem;
+  align-items: center;
+}
+
+.card-header h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.team-role {
+  font-weight: bold;
+  color: #3362ec;
 }
 
 .card-footer {
   display: flex;
   justify-content: space-between;
-  align-items: flex-end;
-  margin-top: auto;
-}
-
-.member-count {
   font-size: 0.9rem;
-  font-weight: bold;
-  text-align: right;
 }
 
-.team-card {
-  cursor: pointer;
-  transition: transform 0.05s ease;
+.logo {
+  width: 100%;
+  max-width: 8rem;
+  height: auto;
+  flex-shrink: 0;
 }
 
-.team-card:hover {
-  transform: translateY(-2px);
-  background-color: #f9f9f9;
-}
-
-.top-bar-actions {
+.logout-button-wrapper {
   display: flex;
-  gap: 1rem;
-}
-
-.top-bar-actions button {
-  padding: 0.5rem 1rem;
-  border: 2px solid black;
-  background: none;
-  font-weight: bold;
-  cursor: pointer;
+  justify-content: flex-end;
 }

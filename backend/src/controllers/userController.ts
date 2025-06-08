@@ -104,6 +104,15 @@ export const loginUser = async (
   }
 };
 
+export const logout = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      res.clearCookie('token');
+      res.status(200).json({ message: 'Logged out' });
+    } catch (error) {
+        next(error);
+    }
+};
+
 export const getAuthenticatedUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     // Mock response for testing

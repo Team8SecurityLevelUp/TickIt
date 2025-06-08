@@ -3,6 +3,7 @@ import React from 'react';
 import { fetcher } from '../utils/fetcher';
 import { Loading } from '../components/Loading';
 import { useAuth } from '../auth/useAuth';
+import TickItLogo from '../assets/TickItLogo.png';
 import './AuthPages.css';
 
 export const Signup = () => {
@@ -29,14 +30,20 @@ export const Signup = () => {
   };
 
   return (
-    <main 
+    <main
       className='auth-wrapper'
     >
-    
+
       {!signupSuccess && (<form
         className='auth-form'
         onSubmit={(e) => e.preventDefault()}
       >
+        <img
+          src={TickItLogo}
+          alt="App Logo"
+          className="auth-logo"
+        />
+
         <h1
           className='auth-title'
         >
@@ -50,6 +57,7 @@ export const Signup = () => {
           type='text'
           value={username}
           onChange={(e) => setUsername(e.target.value)}
+          placeholder='Enter a unique username'
         />
 
         <label>
@@ -59,6 +67,7 @@ export const Signup = () => {
           type='email'
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          placeholder='example@email.com'
         />
 
         <label>
@@ -68,6 +77,7 @@ export const Signup = () => {
           type='password'
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          placeholder='Enter your password'
         />
 
         {formError && (
@@ -78,7 +88,7 @@ export const Signup = () => {
           </p>
         )}
 
-        <button 
+        <button
           type='submit'
           onClick={signup}
         >
@@ -86,35 +96,35 @@ export const Signup = () => {
         </button>
 
         <p>
-          Already have an account? 
-          <Link 
+          Already have an account?{' '}
+          <Link
             to='/login'
           >
             Login
           </Link>
         </p>
       </form>) ||
-      (
-        <section 
-          className='auth-form'
-        >
-          <h1 className='auth-title'>Verify Your Email</h1>
-          <p>We've sent a verification link to &nbsp;
-            <strong>
-              {email}
-            </strong>
-          </p>
-          <p>Please check your inbox to completed your signup.</p>
-          <p>
-            Once verified, you can &nbsp;
+        (
+          <section
+            className='auth-form'
+          >
+            <h1 className='auth-title'>Verify Your Email</h1>
+            <p>We've sent a verification link to &nbsp;
+              <strong>
+                {email}
+              </strong>
+            </p>
+            <p>Please check your inbox to completed your signup.</p>
+            <p>
+              Once verified, you can &nbsp;
               <Link
                 to='/login'
               >
                 log in here
               </Link>.
-          </p>
-        </section>
-      )
+            </p>
+          </section>
+        )
       }
     </main>
   );

@@ -14,7 +14,7 @@ const transporter = nodemailer.createTransport({
 
 export const sendVerificationEmail = async (to: string, token: string) => {
   const info = await transporter.sendMail({
-    from: '"TickIt" <no-reply@tickit.com>',            
+    from: '"TickIt" <no-reply@bbd-grad-project.co.za>',            
     to,                                                
     subject: 'Verify your TickIt account',             
     text: `Your verification code is ${token}`,        
@@ -22,7 +22,7 @@ export const sendVerificationEmail = async (to: string, token: string) => {
       <p>Thank you for signing up!</p>
       <p>Please click the button below to verify your email:</p>
       <a 
-        href="http://localhost:3000/api/user/verify-email?email=${encodeURIComponent(to)}&token=${token}"
+        href="https://bbd-grad-project.co.za/api/user/verify-email?email=${encodeURIComponent(to)}&token=${token}"
       >
         Verify Email
       </a>

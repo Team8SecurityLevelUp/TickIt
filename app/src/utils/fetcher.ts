@@ -1,5 +1,6 @@
 import type { FetcherOptions } from "../types/FetcherOptions";
 
+
 const BASE_URL = 'http://localhost:5000/api';
 
 export const fetcher = (path: string, options: FetcherOptions = {}) => {

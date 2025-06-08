@@ -20,11 +20,13 @@ ALTER TABLE "tasks" ADD FOREIGN KEY ("created_by_user_id") REFERENCES "users" ("
 
 ALTER TABLE "tasks" ADD FOREIGN KEY ("assigned_user_id") REFERENCES "users" ("id");
 
-ALTER TABLE "task_status_history" ADD FOREIGN KEY ("task_id") REFERENCES "tasks" ("id");
+ALTER TABLE "task_history" ADD FOREIGN KEY ("task_id") REFERENCES "tasks" ("id");
 
-ALTER TABLE "task_status_history" ADD FOREIGN KEY ("new_status") REFERENCES "task_statuses" ("id");
+ALTER TABLE "task_history" ADD FOREIGN KEY ("new_status") REFERENCES "task_statuses" ("id");
 
-ALTER TABLE "task_status_history" ADD FOREIGN KEY ("changed_by") REFERENCES "users" ("id");
+ALTER TABLE "task_history" ADD FOREIGN KEY ("changed_by") REFERENCES "users" ("id");
+
+ALTER TABLE "task_history" ADD FOREIGN KEY ("assigned_user_id") REFERENCES "users" ("id");
 
 --Add unique constraints
 ALTER TABLE "users" ADD CONSTRAINT "unique_email" UNIQUE ("email");

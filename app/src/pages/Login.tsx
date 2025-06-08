@@ -6,6 +6,7 @@ import { useAuth } from '../auth/useAuth';
 import { Loading } from '../components/Loading';
 import './AuthPages.css';
 import type { FetchError } from '../types/FetchError';
+import TickItLogo from '../assets/TickItLogo.png';
 
 export const Login = () => {
   const { user, loading } = useAuth();
@@ -43,12 +44,19 @@ export const Login = () => {
   };
 
   return (
-    <main 
+    <main
       className='auth-wrapper'>
       <form
         className='auth-form'
         onSubmit={(e) => e.preventDefault()}
       >
+
+        <img
+          src={TickItLogo}
+          alt="App Logo"
+          className="auth-logo"
+        />
+
         <h1
           className='auth-title'
         >
@@ -56,14 +64,12 @@ export const Login = () => {
         </h1>
 
         {formError && (
-          <p 
-            role="alert"
-          >
+          <p className="form-error" role="alert">
             {formError}
           </p>
         )}
 
-        <label 
+        <label
           htmlFor='email'
         >
           Email
@@ -73,6 +79,7 @@ export const Login = () => {
           type='email'
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          placeholder='example@email.com'
         />
 
         <label>
@@ -82,9 +89,10 @@ export const Login = () => {
           type='password'
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          placeholder='Enter your password'
         />
 
-        <button 
+        <button
           type='submit'
           onClick={login}
           disabled={submitting}
@@ -93,7 +101,7 @@ export const Login = () => {
         </button>
 
         <p>
-          Don't have an account?
+          Don't have an account?{' '}
           <Link
             to='/signup'
           >

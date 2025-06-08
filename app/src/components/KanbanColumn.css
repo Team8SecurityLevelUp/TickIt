@@ -3,7 +3,7 @@
   border-radius: 0.5rem;
   padding: 1rem;
   width: 100%;
-  max-width: 27.5rem;
+  max-width: 25rem;
   height: 25rem;
   display: flex;
   flex-direction: column;
@@ -34,16 +34,26 @@
 }
 
 .create-task-btn {
-  background-color: #28a745;
-  color: white;
-  border: none;
+  color: #2563eb;
+  border: 1px solid  #2563eb;;
+  background-color: transparent;
   padding: 0.4rem 0.6rem;
-  border-radius: 4px;
+  border-radius: 0.3rem;
   cursor: pointer;
   font-size: 0.875rem;
+
+
 }
 
 .create-task-btn:hover {
-  background-color: #218838;
+  background-color: #1d4ed8;
+  color: white;
 }
 
+.logo {
+  width: 10rem;
+  height: auto;
+  cursor: pointer;
+  display: block;
+  max-width: 80%;
+}
