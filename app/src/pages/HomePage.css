@@ -92,9 +92,14 @@ main {
   transition: background 0.2s ease-in-out;
 }
 
-.logout-button:hover,
 .create-team-button:hover {
   background-color: #1d4ed8;
+}
+
+.logout-button:hover
+{
+  background-color: #1d4ed8;
+  color: white;
 }
 
 .team-list {
@@ -110,7 +115,7 @@ main {
 }
 
 .team-card {
-  background-color: #f9f9f9;
+  background-color: #f1f5f9;
   border-radius: 0.5rem;
   padding: 1rem;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
@@ -122,8 +127,8 @@ main {
 }
 
 .team-card:hover {
-  transform: translateY(-0.3px);
-  background-color: #f1f5f9;
+  transform: translateY(-0.05rem);
+  background-color: #e4e7eb;
 }
 
 .team-card.disabled {

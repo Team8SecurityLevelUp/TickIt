@@ -3,7 +3,7 @@
   border-radius: 0.5rem;
   padding: 1rem;
   width: 100%;
-  max-width: 27.5rem;
+  max-width: 25rem;
   height: 25rem;
   display: flex;
   flex-direction: column;
@@ -47,3 +47,10 @@
   background-color: #218838;
 }
 
+.logo {
+  width: 10rem;
+  height: auto;
+  cursor: pointer;
+  display: block;
+  max-width: 80%;
+}

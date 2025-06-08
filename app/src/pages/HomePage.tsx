@@ -97,7 +97,8 @@ export const HomePage = () => {
     show(<FilterTeamsModal onApply={(values) => {
       setFilters(values);
       hide();
-    }} />);
+    }}
+    onClose={hide} />);
   };
 
   const openCreateTeamModal = () => {
@@ -117,6 +118,7 @@ export const HomePage = () => {
             console.error('Create team failed', err);
           }
         }}
+        onClose={hide}
       />
     );
   };
