@@ -70,7 +70,7 @@ data "aws_secretsmanager_secret_version" "postgrespass" {
 resource "aws_db_instance" "tickitdb" {
   identifier             = "tickitdb"
   engine                 = "postgres"
-  engine_version         = "16.4"
+  engine_version         = "16.8"
   instance_class         = "db.t4g.micro"
   db_name                = "tickitdb"
   allocated_storage      = 20
