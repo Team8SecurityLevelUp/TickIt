@@ -29,8 +29,8 @@ router.post("/respond", respondJoinRequest);
 
 router.put("/:teamId/deactivate", deactivateTeam);
 
-router.put("/:teamId", validateRequest(teamCreationSchema), updateTeam);
-
 router.put("/update-role", updateUserRole);
+
+router.put("/:teamId", validateRequest(teamCreationSchema), updateTeam);
 
 export default router;

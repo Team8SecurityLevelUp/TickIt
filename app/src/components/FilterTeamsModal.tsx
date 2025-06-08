@@ -52,9 +52,8 @@ export const FilterTeamsModal = ({ onApply }: Props) => {
           >
             <option value="">Any</option>
             <option value="Creator">Creator</option>
-            <option value="Collaborator">Collaborator</option>
-            <option value="Joinable">Join Team</option>
-            <option value="Requested">*Join Team</option>
+            <option value="Access Admin">Access Admin</option>
+            <option value="ToDoUser">Collaborator</option>
           </select>
         </label>
 
