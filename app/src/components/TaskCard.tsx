@@ -7,9 +7,13 @@ interface TaskCardProps {
   onDragStart: (e: React.DragEvent, taskId: number) => void;
   onClick: (task: Task) => void;
   onDelete: (taskId: number) => void;
+  participants: { user_id: number; username: string }[];
 }
 
-export default function TaskCard({ task, onDragStart, onClick, onDelete }: TaskCardProps) {
+export default function TaskCard({task, onDragStart, onClick, onDelete, participants}: TaskCardProps) {
+  const assignedUser = participants.find(p => p.user_id === task.assignedTo);
+  const assignedName = assignedUser ? assignedUser.username : 'Unassigned';
+
   return (
     <div
       className="kanban-task"
@@ -32,7 +36,7 @@ export default function TaskCard({ task, onDragStart, onClick, onDelete }: TaskC
       <div className="task-title">{task.title}</div>
       <div className="task-desc">{task.description}</div>
       <div className="task-meta">
-        <span>Assigned to: {task.assignedTo}</span><br />
+        <span>Assigned to: {assignedName}</span><br />
         <span>Due: {task.dueDate.toDateString()}</span>
       </div>
     </div>

@@ -3,6 +3,8 @@ import type { Task } from '../types/Task';
 import './KanbanColumn.css';
 import TaskCard from './TaskCard';
 import EditTaskModal from './EditTaskModal';
+import { fetcher } from '../utils/fetcher';
+import type { Member } from './KanbanBoard';
 
 interface KanbanColumnProps {
   statusId: number;
@@ -13,6 +15,8 @@ interface KanbanColumnProps {
   onTaskClick: (task: Task) => void;
   onDeleteTask: (taskId: number) => void;
   onSaveTask: (task: Task) => void;
+  teamId: number;
+  participants: Member[];
 }
 
 export default function KanbanColumn({
@@ -24,6 +28,8 @@ export default function KanbanColumn({
   onTaskClick,
   onDeleteTask,
   onSaveTask,
+  teamId,
+  participants,
 }: KanbanColumnProps) {
   const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState<Partial<Task>>({ statusId });
@@ -39,25 +45,37 @@ export default function KanbanColumn({
   };
 
   const handleSave = () => {
-  const newTask: Task = {
-    taskId: Date.now(),
-    title: formData.title || '',
-    description: formData.description || '',
-    assignedTo: formData.assignedTo || 0,
-    dueDate: formData.dueDate ? new Date(formData.dueDate) : new Date(),
-    statusId: formData.statusId ?? statusId,
+    fetcher('/tasks', {
+      method: 'POST',
+      body: {
+        teamId,
+        title: formData.title,
+        description: formData.description,
+        dueDate: formData.dueDate,
+      },
+    })
+      .then((newTask) => {
+        const parsedTask: Task = {
+          taskId: newTask.taskId,
+          teamId: teamId,
+          title: newTask.title,
+          description: newTask.description,
+          statusId: statusId,
+          createdBy: newTask.createdBy ?? 0,
+          assignedTo: newTask.assignedTo ?? null,
+          createdAt: new Date(newTask.createdAt),
+          dueDate: new Date(newTask.dueDate),
+          completedAt: newTask.completedAt ? new Date(newTask.completedAt) : null,
+        };
 
-   
-    teamId: 1,              
-    createdBy: 1,           
-    createdAt: new Date(),  
-    completedAt: null,     
+        onSaveTask(parsedTask);
+        setShowModal(false);
+        setFormData({ statusId });
+      })
+      .catch((err) => {
+        console.error('Failed to create task:', err);
+      });
   };
-
-  onSaveTask(newTask);
-  setShowModal(false);
-  setFormData({ statusId });
-};
 
   return (
     <div
@@ -82,6 +100,7 @@ export default function KanbanColumn({
             onDragStart={onDragStart}
             onClick={onTaskClick}
             onDelete={onDeleteTask}
+            participants={participants}
           />
         ))}
       </div>
@@ -96,6 +115,7 @@ export default function KanbanColumn({
             setShowModal(false);
             setFormData({ statusId });
           }}
+          participants={participants}
         />
       )}
     </div>
