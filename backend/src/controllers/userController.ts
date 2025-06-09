@@ -8,13 +8,17 @@ import speakeasy from 'speakeasy';
 import qrcode from 'qrcode';
 import { Session } from 'express-session';
 import { update2FASecret } from '../repositories/userRepository';
+import { UnauthorizedError } from '../utils/errors';
 
-// Mock user for testing
-const TEST_USER = {
-  id: 4,
-  email: "12345@gmail.com",
-  username: "Testers"
-};
+declare global {
+  namespace Express {
+    interface User {
+      id: number;
+      email: string;
+      username: string;
+    }
+  }
+}
 
 interface RequestWithSession extends Request {
   session: Session & {
@@ -115,9 +119,20 @@ export const logout = async (req: Request, res: Response, next: NextFunction) =>
 
 export const getAuthenticatedUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    // Mock response for testing
+    if (!req.user) {
+      throw new UnauthorizedError();
+    }
+
+    const user = await getVerifiedUserByEmail(req.user.email);
+    if (!user) {
+      throw new UnauthorizedError();
+    }
+
     res.status(200).json({
-      user: TEST_USER
+      user: {
+        email: user.email,
+        username: user.username
+      }
     });
   } catch (err) {
     next(err);
@@ -130,31 +145,26 @@ export const generate2FA = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    req.user = TEST_USER;
+    if (!req.user) {
+      throw new UnauthorizedError('Authentication required');
+    }
+
+    const userId = parseInt(req.params.userId);
     
-    // Check if we already have a secret in the session
-    if (req.session.twoFactorSecret) {
-      // Recreate QR code from existing secret
-      const existingSecret = {
-        otpauth_url: `otpauth://totp/TickIt%20(${TEST_USER.username})?secret=${req.session.twoFactorSecret}`,
-        base32: req.session.twoFactorSecret
-      };
-      
-      const qrCode = await qrcode.toDataURL(existingSecret.otpauth_url);
-      
-      res.status(200).json({
-        qrCode,
-        message: 'Scan this QR code with your authenticator app'
-      });
-      return;
+    // Verify user is accessing their own 2FA setup
+    if (req.user.id !== userId) {
+      throw new UnauthorizedError('You can only set up 2FA for your own account');
+    }
+
+    const user = await getVerifiedUserByEmail(req.user.email);
+    if (!user) {
+      throw new UnauthorizedError('User not found or email not verified');
     }
     
-    // Generate new secret only if one doesn't exist
     const secret = speakeasy.generateSecret({
-      name: `TickIt (${TEST_USER.username})`,
+      name: `TickIt (${user.username})`,
     });
 
-    // Store in session
     req.session.twoFactorSecret = secret.base32;
     await req.session.save();
 
@@ -175,22 +185,29 @@ export const verify2FA = async (
   next: NextFunction
 ): Promise<void> => {
   try {
+    if (!req.user) {
+      throw new UnauthorizedError('Authentication required');
+    }
+
+    const userId = parseInt(req.params.userId);
+    
+    // Verify user is verifying their own 2FA
+    if (req.user.id !== userId) {
+      throw new UnauthorizedError('You can only verify 2FA for your own account');
+    }
+
     const { token } = req.body;
 
-    // Validate token format
     if (!token || typeof token !== 'string') {
       res.status(400).json({ message: 'Token is required' });
       return;
     }
 
-    // Remove any spaces and validate format
     const cleanToken = token.replace(/\s/g, '');
     if (!/^\d{6}$/.test(cleanToken)) {
       res.status(400).json({ message: 'Token must be 6 digits' });
       return;
     }
-
-    req.user = TEST_USER;
 
     const secret = req.session.twoFactorSecret;
     if (!secret) {
@@ -206,7 +223,7 @@ export const verify2FA = async (
     });
 
     if (isVerified) {
-      await update2FASecret(TEST_USER.id, secret);
+      await update2FASecret(userId, secret);
       delete req.session.twoFactorSecret;
       await req.session.save();
 
@@ -226,16 +243,22 @@ export const complete2FALogin = async (
 ): Promise<void> => {
   try {
     const { otp } = req.body;
-    // For testing, use TEST_USER instead of token verification
-    const user = {
-      email: TEST_USER.email,
-      username: TEST_USER.username,
-      two_factor_authentication_secret: req.session.twoFactorSecret // Use session secret for testing
-    };
+    const token = req.session.loginToken;
+
+    if (!token) {
+      throw new UnauthorizedError('Login token not found. Please login first');
+    }
+
+    const JWT_SECRET = process.env.JWT_SECRET!;
+    const decoded = jwt.verify(token, JWT_SECRET) as { email: string };
+
+    const user = await getVerifiedUserByEmail(decoded.email);
+    if (!user) {
+      throw new UnauthorizedError('User not found or email not verified');
+    }
 
     if (!user.two_factor_authentication_secret) {
-      res.status(400).json({ message: 'Please complete 2FA setup first' });
-      return;
+      throw new UnauthorizedError('2FA not set up for this account');
     }
 
     const isValid = speakeasy.totp.verify({
@@ -250,14 +273,13 @@ export const complete2FALogin = async (
       return;
     }
 
-    // Set test token
-    const token = 'test-token-123';
+    delete req.session.loginToken;
+    await req.session.save();
 
-    // Set the cookie for testing
     res.cookie('token', token, {
       httpOnly: true,
       sameSite: 'lax',
-      secure: false, // Set to false for testing
+      secure: process.env.NODE_ENV === 'production',
       maxAge: 1000 * 60 * 60,
     });
 

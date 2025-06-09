@@ -1,5 +1,5 @@
 import express from "express";
-
+import { authenticateJwt } from '../middlewares/auth';
 import { 
   createUser, 
   loginUser, 
@@ -11,24 +11,18 @@ import {
   logout
 } from "../controllers/userController";
 
-import { validateUserCreation } from "../middlewares/validateRequest";
-
 const router = express.Router();
 
-router.post('/sign-up', validateUserCreation, createUser);
+// Public routes (no auth required)
+router.post('/sign-up', createUser);
 router.get('/verify-email', verifyEmail);
-router.post('/login', loginUser);
+router.post('/login', loginUser as express.RequestHandler);
+router.post('/logout', logout);
 
-
-router.post(
-  '/logout', logout
-)
-
-
-router.get('/auth', getAuthenticatedUser);
-
-router.get('/2fa/setup', generate2FA);
-router.post('/2fa/verify', verify2FA);
-router.post('/2fa/login', complete2FALogin);
+// Protected routes (auth required)
+router.get('/auth', authenticateJwt, getAuthenticatedUser);
+router.get('/:userId/2fa/setup', authenticateJwt, generate2FA as express.RequestHandler);
+router.post('/:userId/2fa/verify', authenticateJwt, verify2FA as express.RequestHandler);
+router.post('/2fa/login', complete2FALogin as express.RequestHandler);
 
 export default router;
