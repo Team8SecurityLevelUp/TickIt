@@ -128,7 +128,6 @@ export default function KanbanBoard() {
   };
 
   const addTask = (newTask: Task) => {
-    console.log(newTask);
     setTasks((prev) => [...prev, newTask]);
   };
 
