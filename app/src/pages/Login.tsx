@@ -22,6 +22,12 @@ export const Login = () => {
     setFormError('');
     setSubmitting(true);
 
+    if (!email || !password) {
+      setFormError('Please enter both email and password');
+      setSubmitting(false);
+      return;
+    }
+
     fetcher('/user/login', {
       method: 'POST',
       body: { email, password },
