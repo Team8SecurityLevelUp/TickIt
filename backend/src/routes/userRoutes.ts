@@ -13,13 +13,11 @@ import {
 
 const router = express.Router();
 
-// Public routes (no auth required)
 router.post('/sign-up', createUser);
 router.get('/verify-email', verifyEmail);
 router.post('/login', loginUser as express.RequestHandler);
 router.post('/logout', logout);
 
-// Protected routes (auth required)
 router.get('/auth', authenticateJwt, getAuthenticatedUser);
 router.get('/:userId/2fa/setup', authenticateJwt, generate2FA as express.RequestHandler);
 router.post('/:userId/2fa/verify', authenticateJwt, verify2FA as express.RequestHandler);

@@ -30,8 +30,11 @@ app.use(session({
   secret: process.env.SESSION_SECRET || 'your-secret-key',
   resave: false,
   saveUninitialized: false,
+  name: 'sessionId', // Change session cookie name
   cookie: {
+    httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
     maxAge: 5 * 60 * 1000 // 5 minutes
   }
 }));

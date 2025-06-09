@@ -95,11 +95,16 @@ export const loginUser = async (
 
     const { token, user } = result;
 
-    // Store token in session instead of sending it to client
-    req.session.loginToken = token;
+    res.cookie('token', token, {
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    });
+
+    req.session.twoFactorSecret = user.two_factor_authentication_secret || undefined;
     await req.session.save();
 
-    // Only send user info and 2FA requirement status
     res.status(200).json({ 
       user: {
         email: user.email,
@@ -155,7 +160,6 @@ export const generate2FA = async (
 
     const userId = parseInt(req.params.userId);
     
-    // Verify user is accessing their own 2FA setup
     if (req.user.id !== userId) {
       throw new UnauthorizedError('You can only set up 2FA for your own account');
     }
@@ -195,7 +199,6 @@ export const verify2FA = async (
 
     const userId = parseInt(req.params.userId);
     
-    // Verify user is verifying their own 2FA
     if (req.user.id !== userId) {
       throw new UnauthorizedError('You can only verify 2FA for your own account');
     }

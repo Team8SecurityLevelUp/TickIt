@@ -8,11 +8,7 @@ export interface JwtPayload {
 }
 
 export const authenticateJwt = (req: Request, res: Response, next: NextFunction): void => {
-  const token =
-    req.cookies?.token ||
-    (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')
-      ? req.headers.authorization.split(' ')[1]
-      : undefined);
+  const token = req.cookies?.token || req.headers.authorization?.split(' ')[1];
 
   if (!token) {
     res.status(401).json({ message: 'Unauthorized: No token provided' });
