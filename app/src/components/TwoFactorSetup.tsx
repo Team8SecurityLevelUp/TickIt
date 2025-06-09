@@ -1,60 +1,89 @@
-import { useEffect, useState } from 'react';
-import axios from 'axios';
+import { useState, useEffect } from 'react';
+import { fetcher } from '../utils/fetcher';
+import './TwoFactorSetup.css';
 
-interface QRCodeResponse {
-  qrCode: string;
-  secret: string;
+interface TwoFactorSetupProps {
+  onVerified: () => void;
+  onCancel: () => void;
 }
 
-const TwoFactorSetup = ({ onVerified }: { onVerified: () => void }) => {
+export const TwoFactorSetup = ({ onVerified, onCancel }: TwoFactorSetupProps) => {
   const [qrCode, setQrCode] = useState<string | null>(null);
-  const [code, setCode] = useState('');
+  const [verificationCode, setVerificationCode] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchQrCode = async () => {
-      try {
-        const res = await axios.get<QRCodeResponse>('/api/2fa/setup', { withCredentials: true });
-        setQrCode(res.data.qrCode);
-      } catch (err) {
-        console.error('Failed to fetch QR code', err);
-      }
-    };
-
     fetchQrCode();
   }, []);
 
-  const handleVerify = async () => {
+  const fetchQrCode = async () => {
     try {
-      const res = await axios.post('/api/2fa/verify', { token: code }, { withCredentials: true });
-      if (res.status === 200) {
-        onVerified();
-      } else {
-        alert('Invalid 2FA token');
-      }
+      const response = await fetcher('/user/2fa/setup');
+      setQrCode(response.qrCode);
     } catch (err) {
-      alert('Verification failed');
+      setError('Failed to generate QR code');
+    } finally {
+      setLoading(false);
     }
   };
 
+  const handleVerify = async () => {
+    try {
+      await fetcher('/user/2fa/verify', {
+        method: 'POST',
+        body: { token: verificationCode }
+      });
+      onVerified();
+    } catch (err) {
+      setError('Invalid verification code');
+    }
+  };
+
+  if (loading) return <div className="loading">Loading...</div>;
+
   return (
-    <div>
-      <h2>Set up Two-Factor Authentication</h2>
-      {qrCode && (
-        <div>
-          <p>Scan this QR code with your authenticator app:</p>
-          <img src={qrCode} alt="2FA QR Code" />
+    <div className="two-factor-setup">
+      <h2>Set Up Two-Factor Authentication</h2>
+      
+      <div className="setup-content">
+        {qrCode && (
+          <div className="qr-section">
+            <h3>1. Scan QR Code</h3>
+            <p>Use Google Authenticator or any other 2FA app to scan:</p>
+            <img src={qrCode} alt="2FA QR Code" />
+          </div>
+        )}
+
+        <div className="verification-section">
+          <h3>2. Enter Verification Code</h3>
+          <p>Enter the 6-digit code from your authenticator app:</p>
+          <input
+            type="text"
+            value={verificationCode}
+            onChange={(e) => setVerificationCode(e.target.value)}
+            maxLength={6}
+            placeholder="000000"
+          />
+          {error && <div className="error-message">{error}</div>}
+          
+          <div className="button-group">
+            <button 
+              className="btn-primary"
+              onClick={handleVerify}
+              disabled={verificationCode.length !== 6}
+            >
+              Verify & Enable 2FA
+            </button>
+            <button 
+              className="btn-secondary"
+              onClick={onCancel}
+            >
+              Skip for now
+            </button>
+          </div>
         </div>
-      )}
-      <input
-        type="text"
-        placeholder="Enter 6-digit code"
-        value={code}
-        onChange={(e) => setCode(e.target.value)}
-        maxLength={6}
-      />
-      <button onClick={handleVerify}>Verify</button>
+      </div>
     </div>
   );
 };
-
-export default TwoFactorSetup;

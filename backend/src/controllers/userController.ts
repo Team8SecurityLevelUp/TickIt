@@ -95,6 +95,21 @@ export const loginUser = async (
 
     const { token, user } = result;
 
+
+    if (user.two_factor_authentication_secret) {
+      req.session.loginToken = token;
+      await req.session.save();
+
+      res.status(200).json({ 
+        requires2FA: true,
+        user: {
+          email: user.email,
+          username: user.username
+        }
+      });
+      return;
+    }
+
     res.cookie('token', token, {
       httpOnly: true,
       sameSite: 'lax',
@@ -102,15 +117,12 @@ export const loginUser = async (
       maxAge: 24 * 60 * 60 * 1000 // 24 hours
     });
 
-    req.session.twoFactorSecret = user.two_factor_authentication_secret || undefined;
-    await req.session.save();
-
     res.status(200).json({ 
+      requires2FA: false,
       user: {
         email: user.email,
         username: user.username
-      },
-      requires2FA: !!user.two_factor_authentication_secret
+      }
     });
   } catch (err) {
     next(err);
@@ -158,12 +170,6 @@ export const generate2FA = async (
       throw new UnauthorizedError('Authentication required');
     }
 
-    const userId = parseInt(req.params.userId);
-    
-    if (req.user.id !== userId) {
-      throw new UnauthorizedError('You can only set up 2FA for your own account');
-    }
-
     const user = await getVerifiedUserByEmail(req.user.email);
     if (!user) {
       throw new UnauthorizedError('User not found or email not verified');
@@ -197,12 +203,6 @@ export const verify2FA = async (
       throw new UnauthorizedError('Authentication required');
     }
 
-    const userId = parseInt(req.params.userId);
-    
-    if (req.user.id !== userId) {
-      throw new UnauthorizedError('You can only verify 2FA for your own account');
-    }
-
     const { token } = req.body;
 
     if (!token || typeof token !== 'string') {
@@ -230,7 +230,7 @@ export const verify2FA = async (
     });
 
     if (isVerified) {
-      await update2FASecret(userId, secret);
+      await update2FASecret(req.user.id, secret);
       delete req.session.twoFactorSecret;
       await req.session.save();
 
@@ -250,22 +250,20 @@ export const complete2FALogin = async (
 ): Promise<void> => {
   try {
     const { otp } = req.body;
-    const token = req.session.loginToken;
+    const loginToken = req.session.loginToken;
 
-    if (!token) {
-      throw new UnauthorizedError('Login token not found. Please login first');
+    if (!loginToken) {
+      res.status(401).json({ message: 'Login token not found. Please login first' });
+      return;
     }
 
     const JWT_SECRET = process.env.JWT_SECRET!;
-    const decoded = jwt.verify(token, JWT_SECRET) as { email: string };
+    const decoded = jwt.verify(loginToken, JWT_SECRET) as { email: string };
 
     const user = await getVerifiedUserByEmail(decoded.email);
-    if (!user) {
-      throw new UnauthorizedError('User not found or email not verified');
-    }
-
-    if (!user.two_factor_authentication_secret) {
-      throw new UnauthorizedError('2FA not set up for this account');
+    if (!user || !user.two_factor_authentication_secret) {
+      res.status(401).json({ message: 'User not found or 2FA not set up' });
+      return;
     }
 
     const isValid = speakeasy.totp.verify({
@@ -283,11 +281,11 @@ export const complete2FALogin = async (
     delete req.session.loginToken;
     await req.session.save();
 
-    res.cookie('token', token, {
+    res.cookie('token', loginToken, {
       httpOnly: true,
       sameSite: 'lax',
       secure: process.env.NODE_ENV === 'production',
-      maxAge: 1000 * 60 * 60,
+      maxAge: 24 * 60 * 60 * 1000 // 24 hours
     });
 
     res.status(200).json({ 
