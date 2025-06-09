@@ -40,6 +40,10 @@ export const createUser = async (req: Request, res: Response, next: NextFunction
     try {
         const { username, password, email } = req.body;
         const user = await registerUser(username, password, email);
+        if (!user){
+          res.status(401).json({message: 'Failed to sign up'});
+          return;
+        }
         res.status(201).json(user);
     } catch (error) {
         next(error);
