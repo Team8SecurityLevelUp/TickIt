@@ -26,10 +26,37 @@ export const Login = () => {
     setFormError('');
     setSubmitting(true);
 
+
     try {
       const response = await fetcher('/user/login', {
         method: 'POST',
         body: { email, password },
+
+    if (!email || !password) {
+      setFormError('Please enter both email and password');
+      setSubmitting(false);
+      return;
+    }
+
+    fetcher('/user/login', {
+      method: 'POST',
+      body: { email, password },
+    })
+      .then(() => {
+        window.location.href = '/';
+      })
+      .catch((error: FetchError) => {
+        if (error.status === 401) {
+          setFormError('Invalid email or password.');
+        } else if (error.status === 403) {
+          setFormError('Email not verified.');
+        } else {
+          setFormError('Something went wrong. Please try again.');
+        }
+      })
+      .finally(() => {
+        setSubmitting(false);
+
       });
 
       if (response.requires2FA) {
