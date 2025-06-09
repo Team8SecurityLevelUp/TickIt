@@ -13,11 +13,23 @@ export const Signup = () => {
   const [password, setPassword] = React.useState('');
   const [formError, setFormError] = React.useState('');
   const [signupSuccess, setSignupSuccess] = React.useState(false);
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const usernameRegex = /^[a-zA-Z0-9]+$/;
 
   if (loading) return <Loading />;
 
   const signup = () => {
     setFormError('');
+
+    if (!emailRegex.test(email)) {
+      setFormError('Please enter a valid email address');
+      return;
+    }
+
+    if (!usernameRegex.test(username)) {
+      setFormError('Username must be alphanumeric (letters and numbers only)');
+      return;
+    }
 
     fetcher('/user/sign-up/', {
       method: 'POST',
