@@ -9,9 +9,10 @@ interface TaskCardProps {
   onClick: (task: Task) => void;
   onDelete: (taskId: number) => void;
   participants: { user_id: number; username: string }[];
+  ableToDelete: boolean;
 }
 
-export default function TaskCard({task, onDragStart, onClick, onDelete, participants}: TaskCardProps) {
+export default function TaskCard({task, onDragStart, onClick, onDelete, participants, ableToDelete}: TaskCardProps) {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   
   const assignedUser = participants.find(p => p.user_id === task.assignedTo);
@@ -38,6 +39,7 @@ export default function TaskCard({task, onDragStart, onClick, onDelete, particip
       onClick={() => onClick(task)}
       style={{ cursor: 'pointer', position: 'relative' }}
     >
+      {ableToDelete && (
       <button
         className="delete-btn"
         onClick={handleDeleteClick}
@@ -46,6 +48,7 @@ export default function TaskCard({task, onDragStart, onClick, onDelete, particip
       >
         x
       </button>
+      )}
       <div className="task-title">{truncatedTitle}</div>
       <div className="task-desc">{truncatedDescription}</div>
       <div className="task-meta">
