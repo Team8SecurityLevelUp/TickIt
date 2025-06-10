@@ -325,7 +325,7 @@ export default {
                 `UPDATE tasks 
                  SET status_id = 4
                  WHERE id = $1
-                 RETURNING *`,
+                 RETURNING assigned_user_id`,
                 [taskId]
             );
 
@@ -333,10 +333,12 @@ export default {
                 throw new Error('Task not found');
             }
 
+            const assignedUserId = updateResult.rows[0].assigned_user_id;
+
             await client.query(
-                `INSERT INTO task_history (task_id, new_status, changed_by)
-                 VALUES ($1, 4, $2)`,
-                [taskId, userId]
+                `INSERT INTO task_history (task_id, new_status, assigned_user_id, changed_by)
+                 VALUES ($1, 4, $2, $3)`,
+                [taskId, assignedUserId, userId]
             );
 
             const result = await client.query(
