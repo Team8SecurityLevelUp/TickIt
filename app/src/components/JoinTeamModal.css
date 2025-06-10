@@ -3,7 +3,6 @@
   flex-direction: column;
   gap: 1.5rem;
   padding: 2rem;
-  border: 2px solid black;
   background: white;
   max-width: 500px;
   width: 100%;
@@ -29,22 +28,35 @@
   flex-wrap: wrap;
 }
 
-.join-button,
-.cancel-button {
-  padding: 0.75rem 1.5rem;
-  border: 2px solid black;
-  background: none;
+.join-button{
+  background-color: #2563eb;
+  color: white;
+  padding: 0.6rem 1.2rem;
   font-weight: bold;
-  font-size: 1rem;
+  border: none;
+  border-radius: 0.3rem;
+  text-align: center;
   cursor: pointer;
-  transition: background 0.2s ease, color 0.2s ease;
+  width: 16.75rem;
+  transition: background 0.2s ease-in-out;
+}
+
+.cancel-button {
+  color: #2563eb;
+  padding: 0.6rem 1.2rem;
+  width: 16.75rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 0.3rem;
+  border: 1px solid  #2563eb;;
+  background-color: transparent;
+  text-align: center;
+  cursor: pointer;
+  transition: background 0.2s ease-in-out;
 }
 
 .join-button:hover {
-  background: black;
+  background-color: #1d4ed8;
   color: white;
 }
 
-.cancel-button:hover {
-  background: #f2f2f2;
-}
