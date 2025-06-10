@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { fetcher } from '../utils/fetcher';
 import './UpdateUserRoleModal.css';
 
-type Role = 'todo_user' | 'team_lead' | 'access_admin';
+type Role = 'ToDoUser' | 'TeamLead' | 'AccessAdmin' | 'Creator';
 
 interface Member {
   user_id: number;
@@ -23,12 +23,19 @@ interface Props {
 export const UpdateUserRoleModal = ({ onClose, teamId }: Props) => {
   const [members, setMembers] = useState<Member[]>([]);
   const [joinRequests, setJoinRequests] = useState<JoinRequest[]>([]);
+  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
+  const [creatorUserId, setCreatorUserId] = useState<number | null>(null);
 
   useEffect(() => {
     fetcher(`/teams/team-members?teamId=${teamId}`)
       .then((res) => {
         setMembers(res.data.members || []);
         setJoinRequests(res.data.joinRequests || []);
+        setCurrentUserId(res.data.currentUserId);
+        const creator = res.data.members.find((m: Member) =>
+          m.roles.includes('Creator')
+        );
+        setCreatorUserId(creator?.user_id ?? null);
       })
       .catch((err) => {
         console.error('Failed to load team members:', err);
@@ -58,9 +65,10 @@ export const UpdateUserRoleModal = ({ onClose, teamId }: Props) => {
   };
 
   const getPrimaryRole = (roles: string[]): Role => {
-    if (roles.includes('AccessAdmin')) return 'access_admin';
-    if (roles.includes('TeamLead')) return 'team_lead';
-    return 'todo_user';
+    if (roles.includes('Creator')) return 'Creator';
+    if (roles.includes('AccessAdmin')) return 'AccessAdmin';
+    if (roles.includes('TeamLead')) return 'TeamLead';
+    return 'ToDoUser';
   };
 
   return (
@@ -70,18 +78,41 @@ export const UpdateUserRoleModal = ({ onClose, teamId }: Props) => {
       <section>
         <h3>Current Team Members</h3>
         <ul className="role-list">
-          {members.map((user) => (
+          {members
+          .map((user) => (
             <li key={user.user_id} className="role-item">
               <label>{user.username}</label>
+            {user.user_id === currentUserId || user.user_id === creatorUserId ? (
+              <span className="readonly-role">{getPrimaryRole(user.roles)}</span>
+            ) : (
               <select
                 value={getPrimaryRole(user.roles)}
-                onChange={() => {}}
-                disabled
+                onChange={async (e) => {
+                  const newRoleName = e.target.value;
+
+                  try {
+                    await fetcher('/teams/update-role', {
+                      method: 'PUT',
+                      body: {
+                        teamId,
+                        targetUserId: user.user_id,
+                        newRoleName,
+                      },
+                    });
+
+                    const updated = await fetcher(`/teams/team-members?teamId=${teamId}`);
+                    setMembers(updated.data.members || []);
+                  } catch (err) {
+                    console.error('Failed to update role:', err);
+                    alert('Failed to update role. You might not have access.');
+                  }
+                }}
               >
-                <option value="todo_user">To-do User</option>
-                <option value="team_lead">Team Lead</option>
-                <option value="access_admin">Access Admin</option>
+                <option value="ToDoUser">To-do User</option>
+                <option value="AccessAdmin">Access Admin</option>
+                <option value="TeamLead">Team Lead</option>
               </select>
+            )}
             </li>
           ))}
         </ul>

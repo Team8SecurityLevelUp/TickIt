@@ -11,11 +11,21 @@ import {
   logout
 } from "../controllers/userController";
 
+import rateLimit from 'express-rate-limit';
+
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  message: {
+    error: 'Too many login/sign-up attempts. Please try again later.'
+  }
+});
+
 const router = express.Router();
 
-router.post('/sign-up', createUser);
+router.post('/sign-up', authLimiter, createUser);
 router.get('/verify-email', verifyEmail);
-router.post('/login', loginUser as express.RequestHandler);
+router.post('/login', authLimiter, loginUser as express.RequestHandler);
 router.post('/logout', logout);
 
 router.get('/auth', authenticateJwt, getAuthenticatedUser);

@@ -53,11 +53,10 @@ export const FilterTeamsModal = ({ onApply, onClose }: Props) => {
       >
         <option value="">Any</option>
         <option value="Creator">Creator</option>
-        <option value="Collaborator">Collaborator</option>
-        <option value="Joinable">Join Team</option>
-        <option value="Requested">*Join Team</option>
+        <option value="Access Admin">Access Admin</option>
+        <option value="ToDoUser">To Do User</option>
+        <option value="TeamLead">Team Lead</option>
       </select>
-
       <button className='submit-button' type="submit">Apply Filters</button>
       <button className="close-button" type="button" onClick={onClose}>Close</button>
     </form>

@@ -202,7 +202,8 @@ export const updateTaskCompletion = async (req: Request, res: Response, next: Ne
 export const deleteTask = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         const taskId = parseInt(req.params.taskId);
-        const { userId } = req.body; // Will be removed when auth is implemented
+        if (!req.user) throw new UnauthorizedError();
+        const userId = req.user.id;
 
         if (isNaN(taskId)) {
             res.status(400).json({

@@ -36,12 +36,6 @@ resource "aws_default_subnet" "subnet_az2" {
 resource "aws_security_group" "allow_postgres" {
   name_prefix = "allow_postgres_"
 
-  ingress {
-    from_port   = 5432
-    to_port     = 5432
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]  //change to only allow connections from EC2
-    /* 
      ingress {
       from_port       = 5432
       to_port         = 5432
@@ -55,9 +49,8 @@ resource "aws_security_group" "allow_postgres" {
       protocol    = "-1"
       cidr_blocks = ["0.0.0.0/0"]
     }
-    */
+
   }
-}
 
 data "aws_secretsmanager_secret_version" "postgresuser" {
   secret_id = "postgresuser"
@@ -88,6 +81,10 @@ resource "aws_db_instance" "tickitdb" {
 output "db_host" {
   value = aws_db_instance.tickitdb.endpoint
   description = "The endpoint of the Postgres Server RDS instance"
+}
+
+output "postgres_sg_id" {
+  value = aws_security_group.allow_postgres.id
 }
 
 
