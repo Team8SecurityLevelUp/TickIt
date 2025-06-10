@@ -87,9 +87,11 @@ export default function KanbanColumn({
         <h2 className="kanban-column-title">
           {title} <span className="task-count">({tasks.length})</span>
         </h2>
+        {statusId === 1 &&
         <button className="create-task-btn" onClick={() => setShowModal(true)}>
           + Add Task
         </button>
+        }
       </div>
 
       <div className="kanban-task-list">
