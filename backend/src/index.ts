@@ -30,11 +30,16 @@ app.use('/api/', limiter);
 
 app.use(express.json());
 app.use(cookieParser());
+
+if (!process.env.SESSION_SECRET) {
+  throw new Error("SESSION_SECRET environment variable is not set");
+}
+
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'your-secret-key',
+  secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
-  name: 'sessionId', // Change session cookie name
+  name: 'sessionId', 
   cookie: {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
@@ -42,6 +47,7 @@ app.use(session({
     maxAge: 5 * 60 * 1000 // 5 minutes
   }
 }));
+
 app.use('/api/user', userRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use('/api/teams', teamRoutes);
