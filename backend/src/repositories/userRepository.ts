@@ -100,3 +100,19 @@ export const hasUsedVerificationToken = async (userId: number) => {
   );
   return (result.rowCount ?? 0) > 0;
 };
+
+export const update2FASecret = async (userId: number, secret: string): Promise<void> => {
+  const result = await db.query(
+    `
+    UPDATE users
+    SET two_factor_authentication_secret = $1
+    WHERE id = $2
+    RETURNING id, two_factor_authentication_secret
+    `,
+    [secret, userId]
+  );
+
+  if (result.rowCount === 0) {
+    throw new Error('Failed to update 2FA secret');
+  }
+};
