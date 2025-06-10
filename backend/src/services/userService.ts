@@ -13,7 +13,24 @@ import jwt from 'jsonwebtoken';
 import { sendVerificationEmail } from '../utils/emailSender';
 import { getPepper } from '../utils/getPepper';
 
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const usernameRegex = /^[a-zA-Z0-9]+$/;
+const specialCharacterRegex = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/;
+
 export const registerUser = async (username: string, password: string, email: string) => {
+
+      if (!emailRegex.test(email)) {
+        throw new Error('Invalid email address');
+      }
+
+      if (!usernameRegex.test(username)) {
+        throw new Error('Username must be alphanumeric');
+      }
+
+      if (!isPasswordValid(password)) {
+        throw new Error('Password does not meet security requirements');
+      }
+      
     const user = await getUserByEmail(email);
     let updateUser = false;
     if(user){
@@ -92,3 +109,13 @@ export const authenticateUser = async (email: string, password: string) => {
     } 
   };
 };
+
+function isPasswordValid(password: string): boolean {
+  return (
+    password.length >= 10 &&
+    /[A-Z]/.test(password) &&
+    /[a-z]/.test(password) &&
+    /[0-9]/.test(password) &&
+    specialCharacterRegex.test(password)
+  );
+}
