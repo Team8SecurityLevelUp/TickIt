@@ -110,6 +110,7 @@ export const UpdateUserRoleModal = ({ onClose, teamId }: Props) => {
               >
                 <option value="ToDoUser">To-do User</option>
                 <option value="AccessAdmin">Access Admin</option>
+                <option value="TeamLead">Team Lead</option>
               </select>
             )}
             </li>
