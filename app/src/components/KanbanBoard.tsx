@@ -62,6 +62,7 @@ export default function KanbanBoard() {
   const parsedTeamId = Number(teamId);
   const [participants, setParticipants] = useState<Member[]>([]);
   const [taskHistory, setTaskHistory] = useState<TaskHistory[]>([]);
+  const [ableToDeleteTask, setAbleToDeleteTask] = React.useState(false);
 
   const onDragStart = (e: React.DragEvent, taskId: number) => {
     e.dataTransfer.setData('text/plain', taskId.toString());
@@ -152,6 +153,7 @@ export default function KanbanBoard() {
         const currentUserId = res.data.currentUserId;
         const currentUser = res.data.members.find((m: Member) => m.user_id === currentUserId);
         setIsAccessAdmin(currentUser?.roles.includes('AccessAdmin') || false);
+        setAbleToDeleteTask(currentUser?.roles?.includes('TeamLead') || currentUser?.roles?.includes('AccessAdmin') || false)
         setParticipants(res.data.members);
       })
       .catch((err) => {
@@ -290,6 +292,7 @@ export default function KanbanBoard() {
           onSaveTask={addTask}
           teamId={parsedTeamId}
           participants={participants}
+          ableToDeleteTask={ableToDeleteTask}
         />
       ))}
         <div className="dashboard-widgets">

@@ -17,6 +17,7 @@ interface KanbanColumnProps {
   onSaveTask: (task: Task) => void;
   teamId: number;
   participants: Member[];
+  ableToDeleteTask: boolean;
 }
 
 export default function KanbanColumn({
@@ -30,6 +31,7 @@ export default function KanbanColumn({
   onSaveTask,
   teamId,
   participants,
+  ableToDeleteTask,
 }: KanbanColumnProps) {
   const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState<Partial<Task>>({ statusId });
@@ -103,6 +105,7 @@ export default function KanbanColumn({
             onClick={onTaskClick}
             onDelete={onDeleteTask}
             participants={participants}
+            ableToDelete={ableToDeleteTask}
           />
         ))}
       </div>
