@@ -3,7 +3,7 @@
   border-radius: 0.5rem;
   padding: 1rem;
   width: 100%;
-  max-width: 25rem;
+  max-width: 26.5rem;
   height: 25rem;
   display: flex;
   flex-direction: column;
@@ -41,8 +41,6 @@
   border-radius: 0.3rem;
   cursor: pointer;
   font-size: 0.875rem;
-
-
 }
 
 .create-task-btn:hover {

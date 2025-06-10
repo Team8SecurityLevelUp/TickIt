@@ -17,6 +17,7 @@ jobs:
     outputs:
       dbhost: ${{ steps.tf_outputs.outputs.dbhost }}
       ec2host: ${{ steps.tf_outputs.outputs.ec2host }}
+      postgres_sg_id: ${{ steps.tf_outputs.outputs.postgres_sg_id }}
     defaults:
       run:
         working-directory: terraform
@@ -61,6 +62,7 @@ jobs:
         run: |
           echo "dbhost=$(terraform output -raw db_host)" >> $GITHUB_OUTPUT
           echo "ec2host=$(terraform output -raw ec2_host)" >> $GITHUB_OUTPUT
+          echo "postgres_sg_id=$(terraform output -raw postgres_sg_id)" >> $GITHUB_OUTPUT
 
   build-front-end:
     name: Build front-end
@@ -327,6 +329,9 @@ jobs:
             proxy_set_header Connection 'upgrade';
             proxy_set_header Host $host;
             proxy_cache_bypass $http_upgrade;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
         }
 
         location /api/ {
@@ -336,6 +341,10 @@ jobs:
             proxy_set_header Connection 'upgrade';
             proxy_set_header Host $host;
             proxy_cache_bypass $http_upgrade;
+
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
         }
         }
         NGINX_CONF
@@ -383,6 +392,27 @@ jobs:
             POSTGRES_USER, postgresuser
             POSTGRES_PASS, postgrespass
 
+      - name: Get public IP of runner
+        id: ip
+        run: echo "ip=$(curl -s https://checkip.amazonaws.com)" >> $GITHUB_OUTPUT
+
+      - name: Authorize GitHub runner IP for Postgres
+        run: |
+          aws ec2 authorize-security-group-ingress \
+            --group-id ${{ needs.terraform.outputs.postgres_sg_id }} \
+            --protocol tcp \
+            --port 5432 \
+            --cidr ${{ steps.ip.outputs.ip }}/32
+
       - name: Run Flyway Migrations
         run: |
           docker run --rm --volume ${{ github.workspace }}/migrations:/flyway/sql:ro redgate/flyway -url="jdbc:postgresql://${{ needs.terraform.outputs.dbhost }}/tickitdb" -user="${{ env.POSTGRES_USER }}" -password="${{ env.POSTGRES_PASS }}" migrate
+
+      - name: Revoke GitHub runner IP
+        if: always()
+        run: |
+          aws ec2 revoke-security-group-ingress \
+            --group-id ${{ needs.terraform.outputs.postgres_sg_id }} \
+            --protocol tcp \
+            --port 5432 \
+            --cidr ${{ steps.ip.outputs.ip }}/32

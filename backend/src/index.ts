@@ -19,6 +19,7 @@ const limiter = rateLimit({
   max: 100 // limit each IP to 100 requests per windowMs
 });
 app.use('/api/', limiter);
+app.set('trust proxy', true);
 
 app.use(cors({
   origin: "http://localhost:5173", 

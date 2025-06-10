@@ -20,9 +20,22 @@
   width: 90%;
 }
 
+.modal-content textarea{
+  width: 100%;
+  padding: 0.3rem;
+  margin-top: 0.25rem;
+  margin-bottom: 1rem;
+  box-sizing: border-box;
+  border-radius: 0.25rem;
+  border: 1px solid #ccc;
+  height: 10rem;
+  font-size: 1rem;
+  font-family: sans-serif;
+}
+
 .modal-content input,
-.modal-content textarea,
 .modal-content select {
+  font-family: sans-serif;
   width: 100%;
   padding: 0.3rem;
   margin-top: 0.25rem;
@@ -31,6 +44,42 @@
   border-radius: 0.25rem;
   border: 1px solid #ccc;
   font-size: 1rem;
+}
+
+.modal-content-task {
+  background-color: white;
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+  margin: 1.5rem;
+  height: 30rem;
+  max-width: 45rem;
+  width: 90%;
+}
+
+.modal-content-task textarea{
+  width: 100%;
+  padding: 0.3rem;
+  margin-top: 0.25rem;
+  margin-bottom: 1rem;
+  box-sizing: border-box;
+  border-radius: 0.25rem;
+  border: 1px solid #ccc;
+  height: 10rem;
+  font-size: 0.8rem;
+  font-family: sans-serif;
+}
+
+.modal-content-task input,
+.modal-content-task select {
+  font-family: sans-serif;
+  width: 100%;
+  padding: 0.3rem;
+  margin-top: 0.25rem;
+  margin-bottom: 1rem;
+  box-sizing: border-box;
+  border-radius: 0.25rem;
+  border: 1px solid #ccc;
+  font-size: 0.8rem;
 }
 
 .task-modal-title {

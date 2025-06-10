@@ -165,7 +165,7 @@ export const rejectJoinRequest = async (teamId: number, userId: number, actingUs
   const pendingRoles = roles.filter(r => r.approval_status === 'Pending');
   if (!pendingRoles.length) throw new BadRequestError('No pending join requests');
 
-  const rejected = await getApprovalStatusByName('Rejected');
+  const rejected = await getApprovalStatusByName('Declined');
   if (!rejected) throw new Error('Rejected status missing');
 
   await updateTeamRoleApprovalStatus(teamId, userId, rejected.id);

@@ -157,6 +157,9 @@ export const HomePage = () => {
               Joinable: 'Join Team',
               Pending: 'Request Pending',
               Declined: 'Request Declined',
+              AccessAdmin: 'Access Admin',
+              TeamLead: 'Team Lead',
+              ToDoUser: 'To Do User',
             }[role] ?? role;
 
             return (
