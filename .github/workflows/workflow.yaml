@@ -17,6 +17,7 @@ jobs:
     outputs:
       dbhost: ${{ steps.tf_outputs.outputs.dbhost }}
       ec2host: ${{ steps.tf_outputs.outputs.ec2host }}
+      postgres_sg_id: ${{ steps.tf_outputs.outputs.postgres_sg_id }}
     defaults:
       run:
         working-directory: terraform
@@ -390,7 +391,7 @@ jobs:
       - name: Authorize GitHub runner IP for Postgres
         run: |
           aws ec2 authorize-security-group-ingress \
-            --group-id ${{ secrets.POSTGRES_SG_ID }} \
+            --group-id ${{ needs.terraform.outputs.postgres_sg_id }} \
             --protocol tcp \
             --port 5432 \
             --cidr ${{ steps.ip.outputs.ip }}/32
@@ -403,7 +404,7 @@ jobs:
         if: always()
         run: |
           aws ec2 revoke-security-group-ingress \
-            --group-id ${{ secrets.POSTGRES_SG_ID }} \
+            --group-id ${{ needs.terraform.outputs.postgres_sg_id }} \
             --protocol tcp \
             --port 5432 \
             --cidr ${{ steps.ip.outputs.ip }}/32
