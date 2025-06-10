@@ -29,6 +29,4 @@ export const sendVerificationEmail = async (to: string, token: string) => {
       <p>If you did not request this, you can safely ignore this email.</p>
     `,
   });
-
-  console.log('Verification email sent:', info.messageId);
 };
