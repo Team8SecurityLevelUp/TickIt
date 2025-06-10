@@ -84,6 +84,7 @@ export default function EditTaskModal({formData, onChange, onSave, onCancel, par
           Due Date:<br />
           <input
             name="dueDate"
+            min={new Date().toISOString().split('T')[0]}
             type="date"
             value={
               formData.dueDate
