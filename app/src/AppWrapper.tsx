@@ -17,6 +17,8 @@ export const AppWrapper = () => (
           <Route path="/" element={<PrivateRoute><HomePage /></PrivateRoute>} />
           <Route path="/login" element={<PublicOnlyRoute><Login /></PublicOnlyRoute>} />
           <Route path="/signup" element={<PublicOnlyRoute><Signup /></PublicOnlyRoute>} />
+
+          <Route path='/team-board' element={<PrivateRoute><TeamBoard /></PrivateRoute>} />
           <Route path="/team-board/:teamId" element={<PrivateRoute><TeamBoard/></PrivateRoute>} />
           <Route path="*" element={<NotFound />} />
         </Routes>

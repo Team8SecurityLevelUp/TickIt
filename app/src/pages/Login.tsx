@@ -4,6 +4,8 @@ import { fetcher } from '../utils/fetcher';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../auth/useAuth';
 import { Loading } from '../components/Loading';
+import { TwoFactorSetup } from '../components/TwoFactorSetup';
+import { TwoFactorLogin } from '../components/TwoFactorLogin';
 import './AuthPages.css';
 import type { FetchError } from '../types/FetchError';
 import TickItLogo from '../assets/TickItLogo.png';
@@ -14,38 +16,69 @@ export const Login = () => {
   const [password, setPassword] = useState('');
   const [formError, setFormError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [showTwoFactorSetup, setShowTwoFactorSetup] = useState(false);
+  const [showTwoFactorLogin, setShowTwoFactorLogin] = useState(false);
 
   if (loading) return <Loading />;
   if (user) return <Navigate to='/' replace />;
 
-  const login = () => {
+  const handleLogin = async () => {
     setFormError('');
     setSubmitting(true);
 
-    fetcher('/user/login', {
-      method: 'POST',
-      body: { email, password },
-    })
-      .then(() => {
-        window.location.href = '/';
-      })
-      .catch((error: FetchError) => {
-        if (error.status === 401) {
-          setFormError('Invalid email or password.');
-        } else if (error.status === 403) {
-          setFormError('Email not verified.');
-        } else {
-          setFormError('Something went wrong. Please try again.');
-        }
-      })
-      .finally(() => {
-        setSubmitting(false);
+    if (!email || !password) {
+      setFormError('Please enter both email and password');
+      setSubmitting(false);
+      return;
+    }
+
+    try {
+      const response = await fetcher('/user/login', {
+        method: 'POST',
+        body: { email, password }
       });
+
+      if (response.requires2FA) {
+        setShowTwoFactorLogin(true);
+      } else {
+        setShowTwoFactorSetup(true);
+      }
+    } catch (error) {
+      const fetchError = error as FetchError;
+      if (fetchError.status === 401) {
+        setFormError('Invalid email or password.');
+      } else if (fetchError.status === 403) {
+        setFormError('Email not verified.');
+      } else if (fetchError.message) {
+        setFormError(fetchError.message);
+      } else {
+        setFormError('An error occurred. Please try again.');
+      }
+    } finally {
+      setSubmitting(false);
+    }
   };
 
+  if (showTwoFactorSetup) {
+    return (
+      <TwoFactorSetup
+        onVerified={() => (window.location.href = '/')}
+        onCancel={() => (window.location.href = '/')}
+      />
+    );
+  }
+
+  if (showTwoFactorLogin) {
+    return (
+      <TwoFactorLogin
+        onSuccess={() => (window.location.href = '/')}
+        onCancel={() => setShowTwoFactorLogin(false)}
+      />
+    );
+  }
+
   return (
-    <main
-      className='auth-wrapper'>
+    <main className='auth-wrapper'>
       <form
         className='auth-form'
         onSubmit={(e) => e.preventDefault()}
@@ -94,7 +127,7 @@ export const Login = () => {
 
         <button
           type='submit'
-          onClick={login}
+          onClick={handleLogin}
           disabled={submitting}
         >
           {submitting ? 'Logging in...' : 'Log In'}

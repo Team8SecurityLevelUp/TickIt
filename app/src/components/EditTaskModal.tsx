@@ -16,7 +16,7 @@ export default function EditTaskModal({formData, onChange, onSave, onCancel, par
   return (
     <div className="modal-backdrop" onClick={onCancel}>
       <div className="modal-content" onClick={e => e.stopPropagation()}>
-        <h2>{formData.taskId ? 'Edit Task' : 'Create Task'}</h2>
+        <h2 className='task-modal-title'>{formData.taskId ? 'Edit Task' : 'Create Task'}</h2>
         <label>
           Title:<br />
           <input
@@ -26,7 +26,7 @@ export default function EditTaskModal({formData, onChange, onSave, onCancel, par
             onChange={onChange}
           />
         </label>
-        <br />
+
         <label>
           Description:<br />
           <textarea
@@ -35,7 +35,7 @@ export default function EditTaskModal({formData, onChange, onSave, onCancel, par
             onChange={onChange}
           />
         </label>
-        <br />
+
         {formData.taskId && (<label>
           Assigned To:<br />
           <select
@@ -51,7 +51,7 @@ export default function EditTaskModal({formData, onChange, onSave, onCancel, par
             ))}
           </select>
         </label>)}
-        <br />
+      
         <label>
           Due Date:<br />
           <input
@@ -65,12 +65,10 @@ export default function EditTaskModal({formData, onChange, onSave, onCancel, par
             onChange={onChange}
           />
         </label>
-        <br />
-        <br /><br />
-        <button onClick={onSave} style={{ marginRight: '0.5rem' }}>
+        <button className='save-button' onClick={onSave} style={{ marginRight: '0.5rem' }}>
           Save
         </button>
-        <button onClick={onCancel}>Cancel</button>
+        <button className='cancel-task-button' onClick={onCancel}>Cancel</button>
       </div>
     </div>
   );

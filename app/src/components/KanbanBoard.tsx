@@ -11,7 +11,7 @@ import { ModalContext } from './ModalContext';
 import { UpdateUserRoleModal } from './UpdateUserRoleModal';
 import { fetcher } from '../utils/fetcher';
 import EditTaskModal from './EditTaskModal';
-import TickItLogo from '../assets/TickItLogo.png';
+import TickItLogo from '../assets/TickItLogoLight.png';
 
 
 export interface Member {
@@ -128,7 +128,6 @@ export default function KanbanBoard() {
   };
 
   const addTask = (newTask: Task) => {
-    console.log(newTask);
     setTasks((prev) => [...prev, newTask]);
   };
 
@@ -265,9 +264,10 @@ export default function KanbanBoard() {
             className="logo"
             onClick={() => navigate('/')}
           />
+
         {isAccessAdmin && parsedTeamId && (
-          <button onClick={() => show(<UpdateUserRoleModal onClose={hide} teamId={parsedTeamId} />)}>
-            Access Manager
+          <button className= 'access-manager-button' onClick={() => show(<UpdateUserRoleModal onClose={hide} teamId={parsedTeamId} />)}>
+            Access Manager Settings
           </button>
         )}
       </header>

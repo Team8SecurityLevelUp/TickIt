@@ -83,5 +83,12 @@ export const authenticateUser = async (email: string, password: string) => {
 
   const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '1h' });
 
-  return { token, user: { email: user.email, username: user.username } };
+  return { 
+    token, 
+    user: { 
+      email: user.email, 
+      username: user.username,
+      two_factor_authentication_secret: user.two_factor_authentication_secret 
+    } 
+  };
 };
