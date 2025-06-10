@@ -383,6 +383,27 @@ jobs:
             POSTGRES_USER, postgresuser
             POSTGRES_PASS, postgrespass
 
+      - name: Get public IP of runner
+        id: ip
+        run: echo "ip=$(curl -s https://checkip.amazonaws.com)" >> $GITHUB_OUTPUT
+
+      - name: Authorize GitHub runner IP for Postgres
+        run: |
+          aws ec2 authorize-security-group-ingress \
+            --group-id ${{ secrets.POSTGRES_SG_ID }} \
+            --protocol tcp \
+            --port 5432 \
+            --cidr ${{ steps.ip.outputs.ip }}/32
+
       - name: Run Flyway Migrations
         run: |
           docker run --rm --volume ${{ github.workspace }}/migrations:/flyway/sql:ro redgate/flyway -url="jdbc:postgresql://${{ needs.terraform.outputs.dbhost }}/tickitdb" -user="${{ env.POSTGRES_USER }}" -password="${{ env.POSTGRES_PASS }}" migrate
+
+      - name: Revoke GitHub runner IP
+        if: always()
+        run: |
+          aws ec2 revoke-security-group-ingress \
+            --group-id ${{ secrets.POSTGRES_SG_ID }} \
+            --protocol tcp \
+            --port 5432 \
+            --cidr ${{ steps.ip.outputs.ip }}/32
