@@ -74,7 +74,7 @@
 {
   background-color: #2563eb;
   color: #e2dfdf;
-  padding: 1rem;
+  padding: 0.6rem;
   font-weight: bold;
   border: none;
   border-radius: 0.5rem;
@@ -85,4 +85,8 @@
 
 .access-manager-button:hover{
     background-color: #1d4ed8;
+}
+
+.logo{
+  margin-right: 1.5rem;
 }
