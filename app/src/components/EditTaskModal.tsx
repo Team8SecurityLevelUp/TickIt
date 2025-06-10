@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './EditTaskModal.css';
 import type { Task } from '../types/Task';
 import type { Member } from './KanbanBoard';
@@ -13,9 +13,31 @@ interface EditTaskModalProps {
 }
 
 export default function EditTaskModal({formData, onChange, onSave, onCancel, participants }: EditTaskModalProps) {
+  const descriptionCharLimit = 512;
+  const titleCharLimit = 128;
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+
+  const handleSave = () => {
+    const newErrors: { [key: string]: string } = {};
+
+    if (!formData.title?.trim()) {
+      newErrors.title = 'Title is required.';
+    }
+    if (!formData.dueDate) {
+      newErrors.dueDate = 'Due date is required.';
+    }
+
+    setErrors(newErrors);
+
+    if (Object.keys(newErrors).length === 0) {
+      onSave();
+    }
+  };
+
+
   return (
     <div className="modal-backdrop" onClick={onCancel}>
-      <div className="modal-content" onClick={e => e.stopPropagation()}>
+      <div className="modal-content-task" onClick={e => e.stopPropagation()}>
         <h2 className='task-modal-title'>{formData.taskId ? 'Edit Task' : 'Create Task'}</h2>
         <label>
           Title:<br />
@@ -24,7 +46,9 @@ export default function EditTaskModal({formData, onChange, onSave, onCancel, par
             type="text"
             value={formData.title || ''}
             onChange={onChange}
+            maxLength={titleCharLimit}
           />
+          {errors.title && <p className="error-message">{errors.title}</p>}
         </label>
 
         <label>
@@ -33,7 +57,11 @@ export default function EditTaskModal({formData, onChange, onSave, onCancel, par
             name="description"
             value={formData.description || ''}
             onChange={onChange}
+            maxLength={descriptionCharLimit}
           />
+          <div className="char-counter">
+            {formData.description?.length || 0} / {descriptionCharLimit}
+          </div>
         </label>
 
         {formData.taskId && (<label>
@@ -64,8 +92,9 @@ export default function EditTaskModal({formData, onChange, onSave, onCancel, par
             }
             onChange={onChange}
           />
+          {errors.dueDate && <p className="error-message">{errors.dueDate}</p>}
         </label>
-        <button className='save-button' onClick={onSave} style={{ marginRight: '0.5rem' }}>
+        <button className='save-button' onClick={handleSave} style={{ marginRight: '0.5rem' }}>
           Save
         </button>
         <button className='cancel-task-button' onClick={onCancel}>Cancel</button>

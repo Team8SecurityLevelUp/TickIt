@@ -132,7 +132,12 @@ export default function KanbanBoard() {
   };
 
   const deleteTask = (taskId: number) => {
-    setTasks(prev => prev.filter(task => task.taskId !== taskId));
+    try {
+      fetcher(`/tasks/${taskId}`, { method: 'DELETE' });
+      setTasks(prev => prev.filter(task => task.taskId !== taskId));
+    } catch (err) {
+      console.error('Failed to delete task:', err);
+    }
   };
 
   React.useEffect(() => {

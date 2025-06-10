@@ -16,13 +16,47 @@ export const Signup = () => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const usernameRegex = /^[a-zA-Z0-9]+$/;
 
+  const specialCharacterRegex = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/;
+
   if (loading) return <Loading />;
+
+    const validatePassword = (password: string): string[] => {
+    const errors: string[] = [];
+
+    if (password.length < 10) {
+      errors.push('Password must be at least 10 characters long.');
+    }
+
+    if (!/[A-Z]/.test(password)) {
+      errors.push('Password must contain at least one uppercase letter.');
+    }
+
+    if (!/[a-z]/.test(password)) {
+      errors.push('Password must contain at least one lowercase letter.');
+    }
+
+    if (!/[0-9]/.test(password)) {
+      errors.push('Password must contain at least one number.');
+    }
+    
+    if (!specialCharacterRegex.test(password)) {
+      errors.push('Password must contain at least one special character. (e.g @,#,$ etc)');
+    }
+    return errors;
+  };
 
   const signup = () => {
     setFormError('');
 
+
     if (!emailRegex.test(email)) {
       setFormError('Please enter a valid email address');
+      return;
+    }
+
+    const passwordErrors = validatePassword(password);
+     if (passwordErrors.length > 0) {
+      setFormError(passwordErrors.join('\n')); 
       return;
     }
 
@@ -93,9 +127,7 @@ export const Signup = () => {
         />
 
         {formError && (
-          <p
-            role='alert'
-          >
+          <p className="form-error" role="alert">
             {formError}
           </p>
         )}

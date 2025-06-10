@@ -4,11 +4,12 @@
   flex-direction: column;
   gap: 2rem;
   width: 100%;
-  max-width: 500px;
+  max-width: 50rem;
   margin: 0 auto;
   background: white;
   padding: 2rem;
   box-sizing: border-box;
+  border-radius: 0.5rem;
 }
 
 .update-role-title {
