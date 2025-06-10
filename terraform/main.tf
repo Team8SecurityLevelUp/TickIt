@@ -83,6 +83,10 @@ output "db_host" {
   description = "The endpoint of the Postgres Server RDS instance"
 }
 
+output "postgres_sg_id" {
+  value = aws_security_group.allow_postgres.id
+}
+
 
 resource "aws_security_group" "ec2_security_group" {
   name_prefix = "tickit_api_sg"
