@@ -20,7 +20,6 @@ export const validateRequest =
       return next(new ValidationError('Validation failed', errors));
     }
 
-    // Attach validated data to req.body
     req.body = result.data;
     next();
   };
