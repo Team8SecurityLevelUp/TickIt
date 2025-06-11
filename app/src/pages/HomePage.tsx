@@ -8,6 +8,7 @@ import { JoinTeamModal } from '../components/JoinTeamModal';
 import { useAuth } from '../auth/useAuth';
 import { fetcher } from '../utils/fetcher';
 import TickItLogo from '../assets/TickItLogo.png';
+import type { FetchError } from '../types/FetchError';
 
 type Team = {
   team_id: number;
@@ -104,7 +105,7 @@ export const HomePage = () => {
   const openCreateTeamModal = () => {
     show(
       <CreateTeam
-        onCreate={async (teamName) => {
+        onCreate={async (teamName, setError) => {
           try {
             const response = await fetcher('/teams/create', {
               method: 'POST',
@@ -115,7 +116,15 @@ export const HomePage = () => {
             hide();
             navigate(`/team-board/${newTeam.id}`);
           } catch (err) {
-            console.error('Create team failed', err);
+            const fetchError = err as FetchError;
+            if (
+              fetchError.message === 'Team limit exceeded'
+            ) {
+              setError('You have exceeded the number of teams allowed per user.');
+            } else {
+              console.error('Create team failed', err);
+              setError('Something went wrong. Please try again.');
+            }
           }
         }}
         onClose={hide}
