@@ -16,6 +16,7 @@ import { BadRequestError, ForbiddenError } from '../utils/errors';
 
 // Role hierarchy for effective permissions
 const ROLE_HIERARCHY: Record<string, string[]> = {
+  Creator: ['Creator', 'AccessAdmin', 'TeamLead', 'ToDoUser'],
   AccessAdmin: ['AccessAdmin', 'TeamLead', 'ToDoUser'],
   TeamLead: ['TeamLead', 'ToDoUser'],
   ToDoUser: ['ToDoUser'],
@@ -103,8 +104,8 @@ export const updateTeamStatus = async (teamId: number, userId: number, isActive:
   const roles = await getUserTeamRoles(userId, teamId);
   const userRoleNames = roles.map(role => role.role_name);
 
-  if (!hasEffectiveRole(userRoleNames, 'AccessAdmin')) {
-    throw new ForbiddenError('Only Access Admins can modify team status');
+  if (!hasEffectiveRole(userRoleNames, 'Creator')) {
+    throw new ForbiddenError('Only the creator can modify team status');
   }
 
   return await updateTeamRepo(teamId, { is_active: isActive });

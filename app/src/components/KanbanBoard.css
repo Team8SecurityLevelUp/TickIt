@@ -90,3 +90,19 @@
 .logo{
   margin-right: 1.5rem;
 }
+
+.deactivate-team-button {
+  background-color: #ef4444;
+  color: white;
+  border: none;
+  padding: 0.6rem 1rem;
+  margin-left: 1rem;
+  border-radius: 0.3rem;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.2s ease-in-out;
+}
+
+.deactivate-team-button:hover {
+  background-color: #dc2626;
+}
