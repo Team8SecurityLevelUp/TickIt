@@ -4,7 +4,7 @@
   border-radius: 0.5rem;
   margin: 1.5rem;
   max-width: 28rem;
-  width: 90%;
+  width: 80%;
   font-family: sans-serif;
   text-align: center;
 }
@@ -28,6 +28,7 @@
   border: none;
   border-radius: 0.3rem;
   font-weight: bold;
+    width: 7rem;
   cursor: pointer;
   transition: background 0.2s ease-in-out;
 }
@@ -41,6 +42,7 @@
   padding: 0.6rem 2rem;
   border-radius: 0.3rem;
   border: 1px solid #2563eb;
+  width: 7rem;
   background-color: transparent;
   cursor: pointer;
   transition: background 0.2s ease-in-out;

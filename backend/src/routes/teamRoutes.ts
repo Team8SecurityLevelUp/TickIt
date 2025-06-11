@@ -15,7 +15,7 @@ import { authenticateJwt } from '../middlewares/auth';
 
 const router = express.Router();
 
-router.use(authenticateJwt); 
+router.use(authenticateJwt({ skip2FA: false }));
 
 router.get("/", getTeams);
 

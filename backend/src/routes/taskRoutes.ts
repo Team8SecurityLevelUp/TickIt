@@ -16,7 +16,7 @@ import {
 
 const router = Router();
 
-router.use(authenticateJwt);
+router.use(authenticateJwt({ skip2FA: false }));
 
 router.get('/', getAllTasks);
 router.get('/:teamId', getAllTeamTasks);
