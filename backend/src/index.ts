@@ -21,7 +21,7 @@ const limiter = rateLimit({
 
 
 app.use(cors({
-  origin: "http://localhost:5173", 
+  origin: "https://www.bbd-grad-project.co.za", 
   credentials: true               
 }));
 
