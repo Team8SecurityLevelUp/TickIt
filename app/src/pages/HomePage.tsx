@@ -117,9 +117,7 @@ export const HomePage = () => {
             navigate(`/team-board/${newTeam.id}`);
           } catch (err) {
             const fetchError = err as FetchError;
-            if (
-              fetchError.message === 'Team limit exceeded'
-            ) {
+            if (fetchError.error === 'You have reached the maximum limit of 10 teams') {
               setError('You have exceeded the number of teams allowed per user.');
             } else {
               console.error('Create team failed', err);
