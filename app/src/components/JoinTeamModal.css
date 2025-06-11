@@ -1,0 +1,62 @@
+.join-modal {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 2rem;
+  background: white;
+  max-width: 500px;
+  width: 100%;
+  box-sizing: border-box;
+  font-family: sans-serif;
+}
+
+.join-modal-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  text-align: center;
+}
+
+.join-modal-text {
+  font-size: 1rem;
+  text-align: center;
+}
+
+.join-modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.join-button{
+  background-color: #2563eb;
+  color: white;
+  padding: 0.6rem 1.2rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 0.3rem;
+  text-align: center;
+  cursor: pointer;
+  width: 16.75rem;
+  transition: background 0.2s ease-in-out;
+}
+
+.cancel-button {
+  color: #2563eb;
+  padding: 0.6rem 1.2rem;
+  width: 16.75rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 0.3rem;
+  border: 1px solid  #2563eb;;
+  background-color: transparent;
+  text-align: center;
+  cursor: pointer;
+  transition: background 0.2s ease-in-out;
+}
+
+.join-button:hover {
+  background-color: #1d4ed8;
+  color: white;
+}
+

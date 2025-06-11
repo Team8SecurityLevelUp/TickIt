@@ -1,0 +1,92 @@
+
+#root, .kanban-container {
+  min-height: 100vh;
+}
+
+
+.kanban-board {
+  display: flex;
+  gap: 1.25rem;
+  justify-content: center;
+  margin-top: 2.5rem;
+  padding: 0 1.25rem 1.25rem;
+  flex-wrap: wrap;
+}
+
+.dashboard-widgets {
+  display: flex; 
+  gap: 1.25rem;  
+  margin-top: 1.25rem;
+  max-width: 80.5rem;
+  width: 100%; 
+}
+
+
+.widget {
+  flex: 1; 
+  min-width: 0; 
+}
+
+.kanban-container {
+  padding: 0 1.25rem;
+  margin: 0 auto;
+  max-width: 87.5rem; 
+}
+
+.kanban-board {
+  display: flex;
+  gap: 1.25rem;
+  justify-content: center;
+  margin-top: 2.5rem;
+  padding: 0 1.25rem 1.25rem;
+  flex-wrap: wrap;
+}
+
+.dashboard-widgets {
+  display: flex; 
+  gap: 1.25rem;  
+  margin-top: 1.25rem;
+  max-width: 87.5rem;
+  width: 100%; 
+}
+
+
+.widget {
+  flex: 1; 
+  min-width: 0; 
+}
+
+@media (max-width: 768px) {
+  .dashboard-widgets {
+    flex-direction: column;
+  }
+}
+
+.kanban-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid #ccc;
+  padding: 1rem;
+}
+
+.access-manager-button
+{
+  background-color: #2563eb;
+  color: #e2dfdf;
+  padding: 0.6rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 0.5rem;
+  text-align: center;
+  cursor: pointer;
+  transition: background 0.2s ease-in-out;
+}
+
+.access-manager-button:hover{
+    background-color: #1d4ed8;
+}
+
+.logo{
+  margin-right: 1.5rem;
+}

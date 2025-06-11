@@ -1,0 +1,30 @@
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { HomePage } from './pages/HomePage';
+import { PrivateRoute } from './auth/PrivateRoute';
+import { AuthProvider } from './auth/AuthProvider';
+import { Login } from './pages/Login';
+import { Signup } from './pages/SignUp';
+import { TeamBoard } from './pages/TeamBoard';
+import { NotFound } from './pages/NotFound';
+import { PublicOnlyRoute } from './PublicOnlyRoutes';
+import { ModalProvider } from './components/ModalProvider';
+import { EmailVerification } from './pages/EmailVerification';
+
+export const AppWrapper = () => (
+  <AuthProvider>
+    <ModalProvider>
+      <Router>
+        <Routes>
+          <Route path="/" element={<PrivateRoute><HomePage /></PrivateRoute>} />
+          <Route path="/login" element={<PublicOnlyRoute><Login /></PublicOnlyRoute>} />
+          <Route path="/signup" element={<PublicOnlyRoute><Signup /></PublicOnlyRoute>} />
+          <Route path="/verify-email" element={<PublicOnlyRoute><EmailVerification /></PublicOnlyRoute>} /> 
+
+          <Route path='/team-board' element={<PrivateRoute><TeamBoard /></PrivateRoute>} />
+          <Route path="/team-board/:teamId" element={<PrivateRoute><TeamBoard/></PrivateRoute>} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </Router>
+    </ModalProvider>
+  </AuthProvider>
+);
