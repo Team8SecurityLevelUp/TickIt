@@ -75,12 +75,6 @@ export const TwoFactorSetup = ({ onVerified, onCancel }: TwoFactorSetupProps) =>
             >
               Verify & Enable 2FA
             </button>
-            <button 
-              className="btn-secondary"
-              onClick={onCancel}
-            >
-              Skip for now
-            </button>
           </div>
         </div>
       </div>
