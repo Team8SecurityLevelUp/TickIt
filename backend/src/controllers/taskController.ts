@@ -1,6 +1,7 @@
 import type { Request, Response, NextFunction } from 'express';
 import taskRepository from '../repositories/taskRepository';
-import { UnauthorizedError } from '../utils/errors';
+import { UnauthorizedError, ForbiddenError } from '../utils/errors';
+import { getUserTeamRoles } from '../repositories/teamRepository';
 
 export const createTask = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
@@ -20,12 +21,18 @@ export const createTask = async (req: Request, res: Response, next: NextFunction
             return;
         }
 
+
+        const userRoles = await getUserTeamRoles(createdByUserId, teamId);
+        if (!userRoles.length || !userRoles.some(role => role.approval_status === 'Accepted')) {
+            throw new ForbiddenError('You must be a member of the team to create tasks');
+        }
+
         try {
             const task = await taskRepository.insertTask(
                 teamId,
                 title,
                 description || '',
-                1,
+                1, 
                 createdByUserId,
                 null,
                 new Date(),
