@@ -63,7 +63,6 @@ export const Login = () => {
     return (
       <TwoFactorSetup
         onVerified={() => (window.location.href = '/')}
-        onCancel={() => (window.location.href = '/')}
       />
     );
   }
