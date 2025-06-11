@@ -4,10 +4,9 @@ import './TwoFactorSetup.css';
 
 interface TwoFactorSetupProps {
   onVerified: () => void;
-  onCancel: () => void;
 }
 
-export const TwoFactorSetup = ({ onVerified, onCancel }: TwoFactorSetupProps) => {
+export const TwoFactorSetup = ({ onVerified }: TwoFactorSetupProps) => {
   const [qrCode, setQrCode] = useState<string | null>(null);
   const [verificationCode, setVerificationCode] = useState('');
   const [error, setError] = useState('');
