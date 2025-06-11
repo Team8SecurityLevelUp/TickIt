@@ -1,6 +1,17 @@
 import db from '../config/database';
 import { DatabaseError } from '../utils/errors';
 
+const checkTeamExistence = async (teamId: number, throwOnTeamNotFound: boolean): Promise<void> => {
+  const teamCheck = await db.query(
+    `SELECT is_active FROM teams WHERE id = $1`,
+    [teamId]
+  );
+
+  if (teamCheck.rows.length === 0 && throwOnTeamNotFound) {
+    throw new DatabaseError(`Team with ID ${teamId} does not exist.`);
+  }
+};
+
 export const insertTeam = async (teamName: string) => {
   try {
     const result = await db.query(
@@ -22,6 +33,8 @@ export const insertTeamRole = async (
   approvalStatusId: number
 ) => {
   try {
+    checkTeamExistence(teamId, true);
+
     const result = await db.query(
       `INSERT INTO team_roles (team_id, user_id, role_id, approved_status_id)
        VALUES ($1, $2, $3, $4)
@@ -38,8 +51,8 @@ export const getTeamById = async (teamId: number) => {
   try {
     const result = await db.query(
       `SELECT id, team_name, is_active, date_created
-       FROM teams
-       WHERE id = $1`,
+       FROM teams t
+       WHERE id = $1 AND t.is_active = true`,
       [teamId]
     );
     return result.rows[0];
@@ -58,8 +71,9 @@ export const fetchTeamParticipants = async (teamId: number) => {
     FROM team_roles tr
     JOIN users u ON u.id = tr.user_id
     JOIN roles r ON r.id = tr.role_id
+    JOIN teams t ON t.id = tr.team_id
     JOIN approval_statuses a ON a.id = tr.approved_status_id
-    WHERE tr.team_id = $1
+    WHERE tr.team_id = $1 AND t.is_active = true
     ORDER BY u.username ASC
   `;
   const result = await db.query(query, [teamId]);
@@ -76,7 +90,7 @@ export const getUserTeamRoles = async (userId: number, teamId?: number) => {
       JOIN team_roles tr ON tr.team_id = t.id
       JOIN roles r ON r.id = tr.role_id
       JOIN approval_statuses ast ON ast.id = tr.approved_status_id
-      WHERE tr.user_id = $1
+      WHERE tr.user_id = $1 AND t.is_active = true
     `;
 
     const values = [userId];
@@ -122,12 +136,13 @@ export const getTeamsWithUserRoles = async (userId: number, teamId?: number) => 
       JOIN team_roles creator_tr ON creator_tr.team_id = t.id
       JOIN roles creator_r ON creator_r.id = creator_tr.role_id AND creator_r.role_name = 'Creator'
       JOIN users u ON u.id = creator_tr.user_id
+      WHERE t.is_active = true
     `;
 
     const values: (number | undefined)[] = [userId];
 
     if (teamId !== undefined) {
-      query += ` WHERE t.id = $2`;
+      query += ` AND t.id = $2`;
       values.push(teamId);
     }
 
@@ -190,6 +205,7 @@ export const updateTeam = async (
     if (setClauses.length === 0) {
       throw new DatabaseError('No fields provided for update');
     }
+    checkTeamExistence(teamId, true);
 
     const query = `
       UPDATE teams
@@ -206,6 +222,8 @@ export const updateTeam = async (
 
 export const insertTeamMember = async (teamId: number, userId: number) => {
   try {
+    checkTeamExistence(teamId, true);
+
     const existing = await db.query(
       `SELECT id FROM team_members WHERE team_id = $1 AND user_id = $2`,
       [teamId, userId]
@@ -228,6 +246,8 @@ export const updateTeamRoleApprovalStatus = async (
   approvalStatusId: number
 ) => {
   try {
+    checkTeamExistence(teamId, true);
+
     const result = await db.query(
       `UPDATE team_roles
        SET approved_status_id = $3
@@ -247,6 +267,8 @@ export const updateTeamRole = async (
   userId: number,
   newRoleId: number
 ) => {
+  checkTeamExistence(teamId, true);
+
   const result = await db.query(
     `UPDATE team_roles
      SET role_id = $3

@@ -22,6 +22,7 @@ router.get("/", getTeams);
 router.get("/team-members", getTeamParticipants);
 
 router.put("/update-role", updateUserRole);
+
 router.post("/create", validateRequest(teamCreationSchema), createTeam);
 
 router.post("/join", validateRequest(teamJoinSchema), joinTeam);
@@ -29,7 +30,6 @@ router.post("/join", validateRequest(teamJoinSchema), joinTeam);
 router.post("/respond", respondJoinRequest);
 
 router.put("/:teamId/deactivate", deactivateTeam);
-
 
 router.put("/:teamId", validateRequest(teamCreationSchema), updateTeam);
 
