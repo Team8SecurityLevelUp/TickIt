@@ -228,7 +228,7 @@ export const insertTeamMember = async (teamId: number, userId: number) => {
       `SELECT id FROM team_members WHERE team_id = $1 AND user_id = $2`,
       [teamId, userId]
     );
-    if (existing.rows.length > 0) return existing.rows[0]; // already a member
+    if (existing.rows.length > 0) return existing.rows[0]; 
 
     const result = await db.query(
       `INSERT INTO team_members (team_id, user_id) VALUES ($1, $2) RETURNING id`,
@@ -277,4 +277,22 @@ export const updateTeamRole = async (
     [teamId, userId, newRoleId]
   );
   return result.rows[0];
+};
+
+export const countUserCreatedTeams = async (userId: number): Promise<number> => {
+  try {
+    const result = await db.query(
+      `SELECT COUNT(*) 
+       FROM team_roles tr
+       JOIN roles r ON r.id = tr.role_id
+       JOIN teams t ON t.id = tr.team_id
+       WHERE tr.user_id = $1 
+       AND r.role_name = 'Creator'
+       AND t.is_active = true`,
+      [userId]
+    );
+    return parseInt(result.rows[0].count);
+  } catch (error) {
+    throw new DatabaseError(`Failed to count user teams: ${(error as Error).message}`);
+  }
 };
