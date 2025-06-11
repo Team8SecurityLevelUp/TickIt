@@ -8,7 +8,7 @@ export interface JwtPayload {
   username?: string;
 }
 
-export const authenticateJwt = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const authenticateJwt = (options?: { skip2FA?: boolean }) => async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   const token = req.cookies?.token || req.headers.authorization?.split(' ')[1];
 
   if (!token) {
@@ -38,7 +38,7 @@ export const authenticateJwt = async (req: Request, res: Response, next: NextFun
         return;
       }
 
-      if (!user.two_factor_authentication_secret) {
+      if (!options?.skip2FA && !user.two_factor_authentication_secret) {
         res.status(403).json({ message: '2FA not enabled. Please enable 2FA to proceed.' });
         return;
       }

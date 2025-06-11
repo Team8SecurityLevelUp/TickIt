@@ -15,7 +15,7 @@ import { authenticateJwt } from '../middlewares/auth';
 
 const router = express.Router();
 
-router.use(authenticateJwt); // Comment this line to disable JWT authentication for team all routes
+router.use(authenticateJwt({ skip2FA: false })); // Comment this line to disable JWT authentication for team all routes
 
 router.get("/", getTeams);
 
