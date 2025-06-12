@@ -1,12 +1,16 @@
 import { useState } from 'react';
-import axios from 'axios';
+import { fetcher } from '../utils/fetcher';
 
 const TwoFactorPrompt = ({ onVerified }: { onVerified: () => void }) => {
   const [code, setCode] = useState('');
 
   const handleVerify = async () => {
     try {
-      const res = await axios.post('/api/2fa/verify', { token: code }, { withCredentials: true });
+      const res = await fetcher('/user/2fa/verify', {
+        method: 'POST',
+        body: { token: code }
+      });
+
       if (res.status === 200) {
         onVerified();
       } else {
