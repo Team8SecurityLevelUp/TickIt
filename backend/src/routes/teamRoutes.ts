@@ -1,6 +1,4 @@
 import express from "express";
-import { validateRequest } from '../middlewares/validateRequest';
-import { teamCreationSchema, teamJoinSchema } from '../schemas/teamSchemas';
 import { 
   createTeam, 
   joinTeam, 
@@ -23,14 +21,15 @@ router.get("/team-members", getTeamParticipants);
 
 router.put("/update-role", updateUserRole);
 
-router.post("/create", validateRequest(teamCreationSchema), createTeam);
+router.post("/create", createTeam);
 
-router.post("/join", validateRequest(teamJoinSchema), joinTeam);
+router.post("/join", joinTeam);
 
 router.post("/respond", respondJoinRequest);
 
 router.put("/:teamId/deactivate", deactivateTeam);
 
-router.put("/:teamId", validateRequest(teamCreationSchema), updateTeam);
+
+router.put("/:teamId", updateTeam);
 
 export default router;
