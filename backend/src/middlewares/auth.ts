@@ -8,6 +8,7 @@ export interface JwtPayload {
   username?: string;
 }
 
+
 export const authenticateJwt = (options?: { skip2FA?: boolean }) => async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   const token = req.cookies?.token || req.headers.authorization?.split(' ')[1];
 
