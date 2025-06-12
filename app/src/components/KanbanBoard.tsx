@@ -12,6 +12,7 @@ import { UpdateUserRoleModal } from './UpdateUserRoleModal';
 import { fetcher } from '../utils/fetcher';
 import EditTaskModal from './EditTaskModal';
 import TickItLogo from '../assets/TickItLogoLight.png';
+import { ConfirmActionModal } from './ConfirmActionModal';
 
 
 export interface Member {
@@ -63,6 +64,7 @@ export default function KanbanBoard() {
   const [participants, setParticipants] = useState<Member[]>([]);
   const [taskHistory, setTaskHistory] = useState<TaskHistory[]>([]);
   const [ableToDeleteTask, setAbleToDeleteTask] = React.useState(false);
+  const [isCreator, setIsCreator] = useState(false);
 
   const onDragStart = (e: React.DragEvent, taskId: number) => {
     e.dataTransfer.setData('text/plain', taskId.toString());
@@ -141,6 +143,20 @@ export default function KanbanBoard() {
     }
   };
 
+  const deactivateTeam = async () => {
+    if (!parsedTeamId) return;
+    try {
+      await fetcher(`/teams/${parsedTeamId}/deactivate`, {
+        method: 'PUT'
+      });
+      hide();
+      navigate('/');
+    } catch (error) {
+      console.error('Failed to deactivate team:', error);
+    }
+  };
+
+
   React.useEffect(() => {
     fetchTaskHistory();
   }, [fetchTaskHistory]);
@@ -155,6 +171,7 @@ export default function KanbanBoard() {
         setIsAccessAdmin(currentUser?.roles.includes('AccessAdmin') || false);
         setAbleToDeleteTask(currentUser?.roles?.includes('TeamLead') || currentUser?.roles?.includes('AccessAdmin') || false)
         setParticipants(res.data.members);
+        setIsCreator(currentUser?.roles.includes('Creator') || false);
       })
       .catch((err) => {
         console.error('Failed to check access admin role', err);
@@ -272,11 +289,30 @@ export default function KanbanBoard() {
             onClick={() => navigate('/')}
           />
 
+        <section>
         {isAccessAdmin && parsedTeamId && (
           <button className= 'access-manager-button' onClick={() => show(<UpdateUserRoleModal onClose={hide} teamId={parsedTeamId} />)}>
             Access Manager Settings
           </button>
         )}
+
+        {isCreator && (
+          <button
+            className="deactivate-team-button"
+            onClick={() =>
+              show(
+                <ConfirmActionModal
+                  message="Are you sure you want to deactivate this team?"
+                  onConfirm={deactivateTeam}
+                  onCancel={hide}
+                />
+              )
+            }
+          >
+            Deactivate Team
+          </button>
+        )}
+        </section>
       </header>
       <div className="kanban-board">
       {columns.map(({ statusId, title }) => (

@@ -23,7 +23,7 @@ declare global {
   }
 }
 
-// get all teams for the logged-in user
+
 export const getTeams = async (req: Request, res: Response, next: NextFunction) => {
   try {
     // req.user = { id: 1 }; // For local testing
@@ -63,25 +63,34 @@ export const getTeamParticipants = async (req: Request, res: Response, next: Nex
   }
 };
 
-// create a new team
+
 export const createTeam = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    // req.user = { id: 4 }; // For local testing
     if (!req.user) throw new UnauthorizedError();
 
     const { teamName } = req.body;
-    const team = await createNewTeam(teamName, req.user.id);
-
-    res.status(201).json({
-      status: 'success',
-      data: team
-    });
+    
+    try {
+      const team = await createNewTeam(teamName, req.user.id);
+      res.status(201).json({
+        status: 'success',
+        data: team
+      });
+    } catch (error) {
+      if (error instanceof BadRequestError) {
+        res.status(400).json({
+          error: error.message
+        });
+        return;
+      }
+      throw error; 
+    }
   } catch (error) {
     next(error);
   }
 };
 
-// join an existing team
+
 export const joinTeam = async (req: Request, res: Response, next: NextFunction) => {
   try {
     // req.user = { id: 1 }; // For local testing
@@ -100,7 +109,6 @@ export const joinTeam = async (req: Request, res: Response, next: NextFunction) 
   }
 };
 
-// respond to join request (accept or reject)
 export const respondJoinRequest = async (req: Request, res: Response, next: NextFunction) => {
   try {
     // req.user = { id: 2 }; // For local testing
@@ -120,7 +128,6 @@ export const respondJoinRequest = async (req: Request, res: Response, next: Next
   }
 };
 
-// update team details
 export const updateTeam = async (req: Request, res: Response, next: NextFunction) => {
   try {
     // req.user = { id: 1 }; // For local testing
@@ -141,7 +148,6 @@ export const updateTeam = async (req: Request, res: Response, next: NextFunction
   }
 };
 
-// deactivate team
 export const deactivateTeam = async (req: Request, res: Response, next: NextFunction) => {
   try {
     // req.user = { id: 2 }; // For local testing
@@ -161,7 +167,7 @@ export const deactivateTeam = async (req: Request, res: Response, next: NextFunc
   }
 };
 
-// update user role on team
+
 export const updateUserRole = async (req: Request, res: Response, next: NextFunction) => {
   try {
     if (!req.user) throw new UnauthorizedError();

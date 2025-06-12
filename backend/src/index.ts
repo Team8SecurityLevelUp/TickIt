@@ -16,12 +16,12 @@ app.use(helmet());
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 100
+  max: 200
 });
 
 
 app.use(cors({
-  origin: "http://localhost:5173", 
+  origin: "https://www.bbd-grad-project.co.za", 
   credentials: true               
 }));
 

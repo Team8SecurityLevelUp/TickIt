@@ -4,10 +4,9 @@ import './TwoFactorSetup.css';
 
 interface TwoFactorSetupProps {
   onVerified: () => void;
-  onCancel: () => void;
 }
 
-export const TwoFactorSetup = ({ onVerified, onCancel }: TwoFactorSetupProps) => {
+export const TwoFactorSetup = ({ onVerified }: TwoFactorSetupProps) => {
   const [qrCode, setQrCode] = useState<string | null>(null);
   const [verificationCode, setVerificationCode] = useState('');
   const [error, setError] = useState('');
@@ -74,12 +73,6 @@ export const TwoFactorSetup = ({ onVerified, onCancel }: TwoFactorSetupProps) =>
               disabled={verificationCode.length !== 6}
             >
               Verify & Enable 2FA
-            </button>
-            <button 
-              className="btn-secondary"
-              onClick={onCancel}
-            >
-              Skip for now
             </button>
           </div>
         </div>
