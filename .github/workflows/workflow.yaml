@@ -269,7 +269,7 @@ jobs:
 
             cd api-build/ &&
 
-            mv ../.env dist/ &&
+            mv ../.env dist/src &&
 
             npm install &&
             
@@ -278,7 +278,7 @@ jobs:
               pm2 delete tickit-api;
             fi &&
             
-            cd dist &&
+            cd dist/src &&
             pm2 start index.js --name tickit-api
           '
 
