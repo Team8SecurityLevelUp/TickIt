@@ -130,8 +130,8 @@ export const UpdateUserRoleModal = ({ onClose, teamId }: Props) => {
               <li key={req.user_id} className="role-item">
                 <label>{req.username}</label>
                 <section className="join-actions">
-                  <button onClick={() => handleJoinRequest(req.user_id, 'accept')}>Accept</button>
-                  <button onClick={() => handleJoinRequest(req.user_id, 'reject')}>Reject</button>
+                  <button className='join-btn' onClick={() => handleJoinRequest(req.user_id, 'accept')}>Accept</button>
+                  <button className='reject-btn' onClick={() => handleJoinRequest(req.user_id, 'reject')}>Reject</button>
                 </section>
               </li>
             ))
