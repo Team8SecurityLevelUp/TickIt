@@ -181,7 +181,7 @@ export default function TaskHistoryCard({ history }: Props) {
                 <li key={entry.id}>
                   <article className="task-history-entry">
                     <header>
-                      <h3>{entry.taskTitle}</h3>
+                      <h3>{entry.taskTitle.length > 15 ? entry.taskTitle.substring(0, 15) + '...' : entry.taskTitle}</h3>
                     </header>
                     <p>{descriptionParts.join('; ')}</p>
                     <footer>

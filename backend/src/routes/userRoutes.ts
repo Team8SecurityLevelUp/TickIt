@@ -28,9 +28,9 @@ router.get('/verify-email', verifyEmail);
 router.post('/login', authLimiter, loginUser as express.RequestHandler);
 router.post('/logout', logout);
 
-router.get('/auth', authenticateJwt, getAuthenticatedUser);
-router.get('/2fa/setup', authenticateJwt, generate2FA as express.RequestHandler);
-router.post('/2fa/verify', authenticateJwt, verify2FA as express.RequestHandler);
+router.get('/auth', authenticateJwt({ skip2FA: false }), getAuthenticatedUser);
+router.get('/2fa/setup', authenticateJwt({ skip2FA: true }), generate2FA as express.RequestHandler);
+router.post('/2fa/verify', authenticateJwt({ skip2FA: true }), verify2FA as express.RequestHandler);
 router.post('/2fa/login', complete2FALogin as express.RequestHandler);
 
 export default router;

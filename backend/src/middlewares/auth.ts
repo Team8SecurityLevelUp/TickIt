@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
+import { getVerifiedUserByEmail } from '../repositories/userRepository';
 
 export interface JwtPayload {
   sub: number;
@@ -7,7 +8,7 @@ export interface JwtPayload {
   username?: string;
 }
 
-export const authenticateJwt = (req: Request, res: Response, next: NextFunction): void => {
+export const authenticateJwt = (options?: { skip2FA?: boolean }) => async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   const token = req.cookies?.token || req.headers.authorization?.split(' ')[1];
 
   if (!token) {
@@ -30,6 +31,17 @@ export const authenticateJwt = (req: Request, res: Response, next: NextFunction)
       'email' in decoded &&
       'username' in decoded
     ) {
+      const user = await getVerifiedUserByEmail(decoded.email);
+
+      if (!user) {
+        res.status(401).json({ message: 'Unauthorized: User not found or not verified' });
+        return;
+      }
+
+      if (!options?.skip2FA && !user.two_factor_authentication_secret) {
+        res.status(403).json({ message: '2FA not enabled. Please enable 2FA to proceed.' });
+        return;
+      }
       req.user = {
         id: typeof decoded.sub === 'string' ? parseInt(decoded.sub, 10) : decoded.sub,
         email: decoded.email,

@@ -1,6 +1,7 @@
 import type { Request, Response, NextFunction } from 'express';
 import taskRepository from '../repositories/taskRepository';
-import { UnauthorizedError } from '../utils/errors';
+import { UnauthorizedError, ForbiddenError } from '../utils/errors';
+import { getUserTeamRoles } from '../repositories/teamRepository';
 
 export const createTask = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
@@ -20,12 +21,18 @@ export const createTask = async (req: Request, res: Response, next: NextFunction
             return;
         }
 
+
+        const userRoles = await getUserTeamRoles(createdByUserId, teamId);
+        if (!userRoles.length || !userRoles.some(role => role.approval_status === 'Accepted')) {
+            throw new ForbiddenError('You must be a member of the team to create tasks');
+        }
+
         try {
             const task = await taskRepository.insertTask(
                 teamId,
                 title,
                 description || '',
-                1,
+                1, 
                 createdByUserId,
                 null,
                 new Date(),
@@ -201,9 +208,9 @@ export const updateTaskCompletion = async (req: Request, res: Response, next: Ne
 
 export const deleteTask = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const taskId = parseInt(req.params.taskId);
         if (!req.user) throw new UnauthorizedError();
         const userId = req.user.id;
+        const taskId = parseInt(req.params.taskId);
 
         if (isNaN(taskId)) {
             res.status(400).json({
@@ -212,17 +219,30 @@ export const deleteTask = async (req: Request, res: Response, next: NextFunction
             return;
         }
 
-        try {
-            const task = await taskRepository.deleteTask(taskId, userId);
-            res.status(200).json(task);
-        } catch (error) {
-            if (error instanceof Error && error.message === 'Task not found') {
-                res.status(404).json({ error: 'Task not found' });
-                return;
-            }
-            throw error;
+        const task = await taskRepository.getTaskById(taskId);
+        if (!task) {
+            res.status(404).json({ error: 'Task not found' });
+            return;
         }
+
+        const userRoles = await getUserTeamRoles(userId, task.teamId);
+        const userRoleNames = userRoles.map(role => role.role_name);
+        
+        const canDelete = userRoleNames.some(role => 
+            role === 'TeamLead' || role === 'AccessAdmin'
+        );
+
+        if (!canDelete) {
+            throw new ForbiddenError('Only Team Leads and Access Admins can delete tasks');
+        }
+
+        const deletedTask = await taskRepository.deleteTask(taskId, userId);
+        res.status(200).json(deletedTask);
     } catch (error) {
+        if (error instanceof ForbiddenError) {
+            res.status(403).json({ error: error.message });
+            return;
+        }
         next(error);
     }
 };

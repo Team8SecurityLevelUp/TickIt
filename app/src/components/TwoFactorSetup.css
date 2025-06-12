@@ -39,7 +39,7 @@
   margin-top: 1.5rem;
 }
 
-.btn-primary, .btn-secondary {
+.btn-primary {
   flex: 1;
   padding: 0.75rem;
   border-radius: 0.5rem;
@@ -51,12 +51,6 @@
   background-color: #2563eb;
   color: white;
   border: none;
-}
-
-.btn-secondary {
-  background-color: white;
-  color: #374151;
-  border: 1px solid #d1d5db;
 }
 
 .error-message {
