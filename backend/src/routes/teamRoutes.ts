@@ -1,5 +1,4 @@
 import express from "express";
-import { validateRequest } from '../middlewares/validateRequest';
 import { 
   createTeam, 
   joinTeam, 
@@ -21,15 +20,16 @@ router.get("/", getTeams);
 router.get("/team-members", getTeamParticipants);
 
 router.put("/update-role", updateUserRole);
-router.post("/create", validateRequest(), createTeam);
 
-router.post("/join", validateRequest(), joinTeam);
+router.post("/create", createTeam);
+
+router.post("/join", joinTeam);
 
 router.post("/respond", respondJoinRequest);
 
 router.put("/:teamId/deactivate", deactivateTeam);
 
 
-router.put("/:teamId", validateRequest(), updateTeam);
+router.put("/:teamId", updateTeam);
 
 export default router;
